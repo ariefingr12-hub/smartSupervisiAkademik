@@ -355,11 +355,43 @@
     }
 
     // FORM SETUP
-    const adm=["CP","ATP","Prosem","Modul Ajar","Kokurikuler","KKTP","Kalender","Inventaris","Jadwal","Kisi-Kisi/Soal","Daftar Nilai","Asesmen Formatif","Asesmen Kokurikuler","Presensi","Jurnal","Analisis Sumatif"];
-    const tlh=["Tujuan & asesmen selaras","Tujuan pembelajaran mengarah pada Dimensi Profil Lulusan.","Kegiatan yang direncanakan sesuai dengan cara/model pembelajaran yang dipilih.","Lingkungan belajar yang direncanakan mendukung murid belajar.","Kerja sama/interaksi murid direncanakan. Ada kegiatan berpasangan/kelompok atau bentuk kemitraan lain","Pemanfaatan digital yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran","Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEMAHAMI 
-Murid menghubungkan pengetahuan lama dengan materi baru; berpikir; bertanya/mengeksplorasi; mengaitkan dengan kehidupan nyata.","Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MENGAPLIKASI Murid mencoba, mempraktikkan, menggunakan konsep, atau menyelesaikan soal/masalah dalam konteks nyata","Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEREFLEKSI 
-Murid menyimpulkan, menilai pemahamannya, menyampaikan kesulitan, pengalaman, atau rencana perbaikan","Bahasa, sikap, dan kegiatan menunjukkan saling menghormati dan memuliakan","Prinsip pembelajaran mendalam berupa berkesadaran, bermakna, dan/atau menggembirakan sudah tergambar pada setiap pengalaman belajar di langkah pembelajaran","Perencanaan pembelajaran sudah mengakomodir pengalaman belajar yang sesuai dengan karakteristik peserta didik","Ada cara mengetahui pengetahuan awal, kesiapan, atau kebutuhan belajar murid","Ada cara memantau proses, memberi umpan balik, dan memperbaiki pembelajaran. (asesmen formatif)","Asesmen akhir sesuai dengan tujuan pembelajaran"];
-    const obs=["Kegiatan awal, inti, dan penutup sesuai/menyesuaikan rencana secara wajar","Murid mengetahui apa yang dipelajari/dikerjakan; kegiatan mengarah ke tujuan.","Murid bertanya, menjawab, berdiskusi, mencoba, mengerjakan, atau berpikir; guru tidak dominan ceramah., guru tidak dominan","Ruang kelas rapi, aman, dan posisi duduk mendukung interaksi belajar (misal: mudah berdiskusi atau melihat papan/media).","Murid saling mendengarkan, berbagi tugas, membantu, dan bekerja sama.","Media/alat peraga/aplikasi benar-benar dipakai oleh guru/murid untuk memperjelas materi (bukan sekadar 	pajangan).","Guru menyapa murid dengan ramah, adil memanggil murid (pria/wanita), dan memperhatikan murid yang pasif/kesulitan.","Guru mengaitkan materi dengan pengetahuan sebelumnya, mengajukan pertanyaan yang membuat berpikir, mengecek pemahaman, dan meluruskan miskonsepsi ","Murid mencoba, mempraktikkan, berdiskusi, menggunakan konsep, atau menyelesaikan soal/masalah","Murid menyimpulkan, menyampaikan yang sudah/belum dipahami, pengalaman, atau perasaan setelah belajar.","Pembelajaran terasa berkesadaran, bermakna, dan/atau menggembirakan","Guru menyesuaikan penjelasan, tugas, bantuan, pengelompokan, atau cara belajar sesuai kebutuhan murid.","Guru mengecek kesiapan, pengetahuan awal, atau kebutuhan murid sebelum/di awal pembelajaran","Guru memantau saat murid bekerja, memberikan pujian/koreksi (umpan balik) secara langsung untuk membantu murid membaik.","Ada bukti pencapaian tujuan/kompetensi melalui tes, praktik, proyek, presentasi, portofolio, atau cara lain.( jika selesai 1 TP)"];
+    const adm = ["CP", "ATP", "Prosem", "Modul Ajar", "Kokurikuler", "KKTP", "Kalender", "Inventaris", "Jadwal", "Kisi-Kisi/Soal", "Daftar Nilai", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal", "Analisis Sumatif"];
+    
+    const tlh = [
+        "Tujuan & asesmen selaras",
+        "Tujuan pembelajaran mengarah pada Dimensi Profil Lulusan.",
+        "Kegiatan yang direncanakan sesuai dengan cara/model pembelajaran yang dipilih.",
+        "Lingkungan belajar yang direncanakan mendukung murid belajar.",
+        "Kerja sama/interaksi murid direncanakan. Ada kegiatan berpasangan/kelompok atau bentuk kemitraan lain",
+        "Pemanfaatan digital yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran",
+        "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEMAHAMI: Murid menghubungkan pengetahuan lama dengan materi baru; berpikir; bertanya/mengeksplorasi; mengaitkan dengan kehidupan nyata.",
+        "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MENGAPLIKASI: Murid mencoba, mempraktikkan, menggunakan konsep, atau menyelesaikan soal/masalah dalam konteks nyata",
+        "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEREFLEKSI: Murid menyimpulkan, menilai pemahamannya, menyampaikan kesulitan, pengalaman, atau rencana perbaikan",
+        "Bahasa, sikap, dan kegiatan menunjukkan saling menghormati dan memuliakan",
+        "Prinsip pembelajaran mendalam berupa berkesadaran, bermakna, dan/atau menggembirakan sudah tergambar pada setiap pengalaman belajar di langkah pembelajaran",
+        "Perencanaan pembelajaran sudah mengakomodir pengalaman belajar yang sesuai dengan karakteristik peserta didik",
+        "Ada cara mengetahui pengetahuan awal, kesiapan, atau kebutuhan belajar murid",
+        "Ada cara memantau proses, memberi umpan balik, dan memperbaiki pembelajaran. (asesmen formatif)",
+        "Asesmen akhir sesuai dengan tujuan pembelajaran"
+    ];
+
+    const obs = [
+        "Kegiatan awal, inti, dan penutup sesuai/menyesuaikan rencana secara wajar",
+        "Murid mengetahui apa yang dipelajari/dikerjakan; kegiatan mengarah ke tujuan.",
+        "Murid bertanya, menjawab, berdiskusi, mencoba, mengerjakan, atau berpikir; guru tidak dominan ceramah.",
+        "Ruang kelas rapi, aman, dan posisi duduk mendukung interaksi belajar (misal: mudah berdiskusi atau melihat papan/media).",
+        "Murid saling mendengarkan, berbagi tugas, membantu, dan bekerja sama.",
+        "Media/alat peraga/aplikasi benar-benar dipakai oleh guru/murid untuk memperjelas materi (bukan sekadar pajangan).",
+        "Guru menyapa murid dengan ramah, adil memanggil murid (pria/wanita), dan memperhatikan murid yang pasif/kesulitan.",
+        "Guru mengaitkan materi dengan pengetahuan sebelumnya, mengajukan pertanyaan yang membuat berpikir, mengecek pemahaman, dan meluruskan miskonsepsi.",
+        "Murid mencoba, mempraktikkan, berdiskusi, menggunakan konsep, atau menyelesaikan soal/masalah",
+        "Murid menyimpulkan, menyampaikan yang sudah/belum dipahami, pengalaman, atau perasaan setelah belajar.",
+        "Pembelajaran terasa berkesadaran, bermakna, dan/atau menggembirakan",
+        "Guru menyesuaikan penjelasan, tugas, bantuan, pengelompokan, atau cara belajar sesuai kebutuhan murid.",
+        "Guru mengecek kesiapan, pengetahuan awal, atau kebutuhan murid sebelum/di awal pembelajaran",
+        "Guru memantau saat murid bekerja, memberikan pujian/koreksi (umpan balik) secara langsung untuk membantu murid membaik.",
+        "Ada bukti pencapaian tujuan/kompetensi melalui tes, praktik, proyek, presentasi, portofolio, atau cara lain. (jika selesai 1 TP)"
+    ];
 
     function buildTb(id, arr, note){
         let h=''; arr.forEach((a,i)=>{ h+=`<tr><td class="text-center">${i+1}</td><td>${a}</td><td><input type="number" min="0" max="4" value="4" class="v-${id}" style="width:100%;box-sizing:border-box;"></td>${note?`<td><input type="text" class="n-${id}" style="width:100%;box-sizing:border-box;" placeholder="Opsional"></td>`:''}</tr>`});
@@ -458,3 +490,4 @@ Murid menyimpulkan, menilai pemahamannya, menyampaikan kesulitan, pengalaman, at
 </script>
 </body>
 </html>
+```[cite: 2]
