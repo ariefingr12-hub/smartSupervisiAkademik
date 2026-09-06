@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Supervisi K3S</title>
+    <style>
+        :root { --primary: #0056b3; --accent: #28a745; --bg: #eef2f5; --border: #ccc; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
+        .container { max-width: 900px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Logo & Header Styling */
+        .header-container { text-align: center; margin-bottom: 20px; }
+        .logo { max-width: 100px; height: auto; margin-bottom: 10px; }
+        .header-title { color: var(--primary); margin: 0 0 5px 0; font-size: 24px; }
+        .header-subtitle { color: #666; font-size: 14px; margin: 0; }
+
+        .nav-tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+        .tab-btn { padding: 12px 20px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section-title { background: var(--primary); color: white; padding: 10px; border-radius: 5px; font-weight: bold; margin: 25px 0 15px 0; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 10px; }
+        .form-group label { font-weight: 600; font-size: 13px; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { padding: 10px; border: 1px solid var(--border); border-radius: 5px; font-family: inherit; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
+        th, td { border: 1px solid var(--border); padding: 8px; }
+        th { background: #f8f9fa; text-align: center; }
+        .text-center { text-align: center; }
+        .btn { padding: 12px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; color: white; width: 100%; display: inline-block; text-align: center; text-decoration: none; box-sizing: border-box; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-submit { background: var(--accent); }
+        .btn-primary { background: var(--primary); }
+        .btn-wa { background: #25D366; margin-top: 10px; }
+        .result-box { display: none; background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px; border: 1px solid var(--accent); }
+        .card-result { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 10px; background: #fafafa; }
+        #view-refleksi { display: none; max-width: 500px; margin: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- VIEW UTAMA K3S -->
+    <div id="view-main">
+        <div class="header-container">
+            <!-- LOGO DITAMBAHKAN DI SINI -->
+            <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
+            <h2 class="header-title">SUPERVISI K3S (FORMAT SILANG)</h2>
+            <p class="header-subtitle">Sistem Input K3S & Portal Akses Guru</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-input', event)">📝 Input Supervisi Baru</button>
+            <button class="tab-btn" onclick="switchTab('tab-portal', event)">🔍 Portal Cek Hasil</button>
+        </div>
+
+        <div id="tab-input" class="tab-content active">
+            <form id="supervisiForm">
+                <div class="section-title">A. IDENTITAS & KONTAK GURU</div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Nama Supervisor (K3S)</label><input type="text" id="supervisor" required></div>
+                    <div class="form-group"><label>Nama Pendidik (Guru)</label><input type="text" id="guru" required></div>
+                    <div class="form-group"><label>NIP / ID Guru</label><input type="text" id="nipGuru"></div>
+                    <div class="form-group"><label>Email Guru</label><input type="email" id="emailGuru"></div>
+                    <div class="form-group"><label>No. WhatsApp Guru</label><input type="text" id="waGuru"></div>
+                    <div class="form-group"><label>Nama Sekolah Target</label><input type="text" id="sekolah" required></div>
+                    <div class="form-group"><label>Mata Pelajaran / Kelas</label><input type="text" id="mapel" required></div>
+                    <div class="form-group"><label>Hari / Tanggal Supervisi</label><input type="date" id="tanggal" required></div>
+                </div>
+
+                <div class="section-title">B. ADMINISTRASI (0-4)</div>
+                <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="60">Nilai</th></tr></thead><tbody id="tb-admin"></tbody></table>
+
+                <div class="section-title">C. TELAAH PERENCANAAN (0-4)</div>
+                <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="60">Nilai</th><th>Catatan</th></tr></thead><tbody id="tb-telaah"></tbody></table>
+                <div class="form-group"><label>Kelebihan Perencanaan:</label><textarea id="kel_perencanaan" rows="2"></textarea></div>
+                <div class="form-group"><label>Saran Perencanaan:</label><textarea id="sar_perencanaan" rows="2"></textarea></div>
+
+                <div class="section-title">D. OBSERVASI PELAKSANAAN (0-4)</div>
+                <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="60">Nilai</th><th>Catatan</th></tr></thead><tbody id="tb-observasi"></tbody></table>
+                <div class="form-group"><label>Kelebihan Pelaksanaan:</label><textarea id="kel_pelaksanaan" rows="2"></textarea></div>
+                <div class="form-group"><label>Saran Pelaksanaan:</label><textarea id="sar_pelaksanaan" rows="2"></textarea></div>
+
+                <button type="submit" class="btn btn-submit" id="btnSubmit">SIMPAN DATA SUPERVISI</button>
+            </form>
+
+            <div id="resultBox" class="result-box">
+                <h3 style="color: var(--accent); margin:0 0 10px 0;">Data Berhasil Disimpan!</h3>
+                <p style="margin: 5px 0;">Nilai Akhir: <b id="resNilai" style="font-size:18px;"></b> (<span id="resPredikat"></span>)</p>
+                <a id="btnWaDirect" href="#" target="_blank" class="btn btn-wa">📱 Kirim Pesan & Link Refleksi via WhatsApp</a>
+            </div>
+        </div>
+
+        <div id="tab-portal" class="tab-content">
+            <div class="section-title">CARI HASIL SUPERVISI</div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="searchKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:10px; border-radius:5px; border:1px solid #ccc;">
+                <button class="btn btn-primary" style="width:120px;" onclick="doSearch()">Cari</button>
+            </div>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- VIEW REFLEKSI GURU (DIBUKA DARI LINK WA VERCEL) -->
+    <div id="view-refleksi">
+        <div class="header-container">
+            <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
+            <h2 class="header-title">Form Refleksi Guru</h2>
+            <p class="header-subtitle" id="refleksiSubtitle">Memuat data...</p>
+        </div>
+        
+        <form id="refleksiForm" style="display:none;">
+            <div class="form-group">
+                <label>1. Bagaimana perasaan/kendala Anda saat disupervisi?</label>
+                <textarea id="val-refleksi" rows="4" required placeholder="Ceritakan perasaan dan kendala yang dialami..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>2. Apa Rencana Tindak Lanjut (RTL) perbaikan Anda?</label>
+                <textarea id="val-rtl" rows="4" required placeholder="Tuliskan rencana perbaikan untuk pembelajaran selanjutnya..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnKirimRefleksi">KIRIM REFLEKSI</button>
+        </form>
+        <div id="refleksiSuccess" class="result-box">
+            <h3 style="color: var(--accent); margin:0;">Terima Kasih!</h3>
+            <p style="margin-top: 5px;">Refleksi dan RTL Anda telah berhasil disimpan ke dalam sistem.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // PASTE URL DEPLOYMENT WEB APP GAS KAMU DI BAWAH INI
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx3d53OyobQxTeFAmd3FeOmwVwad_OOrdegjRHH-bIBWlllfu2ia6zfw-5xZZUqeBP_zw/exec";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlRefleksiId = urlParams.get('refleksi');
+
+    if (urlRefleksiId) {
+        // Tampilkan halaman refleksi
+        document.getElementById('view-main').style.display = 'none';
+        document.getElementById('view-refleksi').style.display = 'block';
+
+        fetch(`${GAS_API_URL}?action=getRefleksi&idTx=${urlRefleksiId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('refleksiSubtitle').innerHTML = `Yth. <b>${data.guru}</b><br>Tanggal Supervisi: ${data.tanggal}`;
+                    document.getElementById('refleksiForm').style.display = 'block';
+                } else {
+                    document.getElementById('refleksiSubtitle').innerHTML = `Data tidak ditemukan atau ID tidak valid.`;
+                }
+            })
+            .catch(err => {
+                document.getElementById('refleksiSubtitle').innerHTML = `Gagal terhubung ke server.`;
+            });
+
+        document.getElementById('refleksiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('btnKirimRefleksi').innerText = 'Mengirim Data...';
+            document.getElementById('btnKirimRefleksi').disabled = true;
+
+            fetch(GAS_API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'simpanRefleksi',
+                    idTx: urlRefleksiId,
+                    refleksi: document.getElementById('val-refleksi').value,
+                    rtl: document.getElementById('val-rtl').value
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    document.getElementById('refleksiForm').style.display = 'none';
+                    document.getElementById('refleksiSuccess').style.display = 'block';
+                } else { 
+                    alert('Gagal menyimpan: ' + res.message); 
+                    document.getElementById('btnKirimRefleksi').innerText = 'KIRIM REFLEKSI';
+                    document.getElementById('btnKirimRefleksi').disabled = false;
+                }
+            });
+        });
+    } else {
+        // Tampilkan halaman form utama K3S
+        const adm=["CP","ATP","Prosem","Modul Ajar","Kokurikuler","KKTP","Kalender","Inventaris","Jadwal","Kisi-Kisi/Soal","Daftar Nilai","Asesmen Formatif","Asesmen Kokurikuler","Presensi","Jurnal","Analisis Sumatif"];
+        const tlh=["Tujuan, kegiatan, dan asesmen saling mendukung.","Tujuan pembelajaran mengarah pada Dimensi Profil Lulusan.","Kegiatan sesuai model","Lingkungan dukung belajar","Interaksi kelompok direncanakan","Pemanfaatan digital tergambar","Fasilitasi tahap MEMAHAMI","Fasilitasi tahap MENGAPLIKASI","Fasilitasi tahap MEREFLEKSI","Bahasa saling menghormati","Prinsip berkesadaran/bermakna","Sesuai karakteristik siswa","Cek kesiapan awal murid","Asesmen formatif (umpan balik)","Asesmen akhir sesuai tujuan"];
+        const obs=["Kegiatan wajar","Murid tahu tujuan belajar","Murid aktif, guru tidak dominan","Ruang kelas rapi & aman","Murid saling kolaborasi","Alat peraga dipakai benar","Guru ramah & adil","Kaitkan materi & picu nalar","Murid praktik/selesaikan masalah","Murid menyimpulkan belajar","Pembelajaran bermakna","Bantuan sesuai kebutuhan murid","Cek kesiapan di awal","Umpan balik positif diberikan","Ada bukti pencapaian (tes/praktik)"];
+
+        function buildTb(id, arr, note){
+            let h=''; arr.forEach((a,i)=>{ h+=`<tr><td class="text-center">${i+1}</td><td>${a}</td><td><input type="number" min="0" max="4" value="4" class="v-${id}" style="width:100%;box-sizing:border-box;"></td>${note?`<td><input type="text" class="n-${id}" style="width:100%;box-sizing:border-box;" placeholder="Opsional"></td>`:''}</tr>`});
+            document.getElementById(id).innerHTML = h;
+        }
+
+        buildTb('tb-admin', adm, false); buildTb('tb-telaah', tlh, true); buildTb('tb-observasi', obs, true);
+
+        function ext(id, note){
+            let r=[], vals=document.querySelectorAll(`.v-${id}`), nots=note?document.querySelectorAll(`.n-${id}`):[];
+            vals.forEach((v,i)=> r.push({nilai:v.value, catatan:note?nots[i].value:""})); return r;
+        }
+
+        document.getElementById('supervisiForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            document.getElementById('btnSubmit').innerText = 'Menyimpan Data...';
+            document.getElementById('btnSubmit').disabled = true;
+            
+            const vercelBaseUrl = window.location.origin + window.location.pathname;
+            const pay = {
+                action: 'simpanData',
+                data: {
+                    vercelBaseUrl: vercelBaseUrl,
+                    supervisor: document.getElementById('supervisor').value, guru: document.getElementById('guru').value,
+                    nipGuru: document.getElementById('nipGuru').value, emailGuru: document.getElementById('emailGuru').value,
+                    waGuru: document.getElementById('waGuru').value, sekolah: document.getElementById('sekolah').value,
+                    mapel: document.getElementById('mapel').value, tanggal: document.getElementById('tanggal').value,
+                    administrasi: ext('tb-admin',false), telaah: ext('tb-telaah',true), observasi: ext('tb-observasi',true),
+                    kelebihanPerencanaan: document.getElementById('kel_perencanaan').value, saranPerencanaan: document.getElementById('sar_perencanaan').value,
+                    kelebihanPelaksanaan: document.getElementById('kel_pelaksanaan').value, saranPelaksanaan: document.getElementById('sar_pelaksanaan').value
+                }
+            };
+
+            fetch(GAS_API_URL, {
+                method: 'POST',
+                body: JSON.stringify(pay)
+            })
+            .then(res => res.json())
+            .then(res => {
+                document.getElementById('btnSubmit').innerText = 'SIMPAN DATA SUPERVISI';
+                document.getElementById('btnSubmit').disabled = false;
+                if(res.status==='success'){
+                    document.getElementById('resultBox').style.display='block';
+                    document.getElementById('resNilai').innerText=res.nilaiAkhir; 
+                    document.getElementById('resPredikat').innerText=res.predikat;
+                    if(res.waUrl) { 
+                        document.getElementById('btnWaDirect').href=res.waUrl; 
+                        document.getElementById('btnWaDirect').style.display='inline-block'; 
+                    } else { 
+                        document.getElementById('btnWaDirect').style.display='none'; 
+                    }
+                    document.getElementById('supervisiForm').reset();
+                    window.scrollTo(0, document.body.scrollHeight);
+                } else alert('Error: '+res.message);
+            })
+            .catch(err => {
+                document.getElementById('btnSubmit').innerText = 'SIMPAN DATA SUPERVISI';
+                document.getElementById('btnSubmit').disabled = false;
+                alert('Gagal terhubung ke server.');
+            });
+        });
+    }
+
+    function switchTab(id, e) {
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        e.target.classList.add('active'); document.getElementById(id).classList.add('active');
+    }
+
+    function doSearch(){
+        const kw=document.getElementById('searchKeyword').value;
+        if(!kw) return;
+        document.getElementById('searchResults').innerHTML='<p style="text-align:center; color:#666;">Sedang mencari data...</p>';
+        fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(kw)}`)
+            .then(res => res.json())
+            .then(res => {
+                let c=document.getElementById('searchResults');
+                if(!res.data || res.data.length===0){ c.innerHTML='<p style="text-align:center; color:red;">Data tidak ditemukan.</p>'; return; }
+                let h=''; 
+                res.data.forEach(x=>{ 
+                    h+=`<div class="card-result">
+                            <div style="font-size:16px; font-weight:bold; color:var(--primary);">${x.guru}</div>
+                            <div style="font-size:13px; color:#666; margin-bottom:8px;">${x.sekolah} | Mapel: ${x.mapel}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:13px;">Tgl: ${x.tanggal}</span>
+                                <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
+                            </div>
+                        </div>`; 
+                }); 
+                c.innerHTML=h;
+            })
+            .catch(err => {
+                document.getElementById('searchResults').innerHTML = '<p style="text-align:center; color:red;">Gagal terhubung ke server.</p>';
+            });
+    }
+</script>
+</body>
+</html>
