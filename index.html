@@ -158,7 +158,7 @@
         .result-box { display: none; background: #ecfdf5; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; border: 1px solid #a7f3d0; }
         .card-result { border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         
-        .detail-btn { background: #e2e8f0; color: #334155; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .detail-btn { background: #e2e8f0; color: #334155; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; width: 100%; margin-top: 12px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .detail-btn:hover { background: #cbd5e1; }
         
         #view-main, #view-refleksi { display: none; }
@@ -284,6 +284,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
 
+    // JIKA DIAKSES DARI LINK REFLEKSI
     if (urlRefleksiId) {
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-refleksi').style.display = 'block';
@@ -330,6 +331,7 @@
         });
     }
 
+    // AUTHENTICATION LOGIC
     function loginAdmin() {
         const inputPin = document.getElementById('adminPin').value;
         if (inputPin === ADMIN_PIN) {
@@ -355,6 +357,7 @@
         document.getElementById('adminPin').value = '';
     }
 
+    // FORM SETUP (Data Aspek)
     const adm = ["CP", "ATP", "Prosem", "Rencana Pembelajaran / Modul Ajar", "Perencanaan Kokurikuler ", "KKTP", "Kalender Pendidikan Sekolah ", "Buku inventaris kelas", "Jadwal Pelajaran", "Kisi-Kisi dan Soal", "Daftar Nilai Murid", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal harian Guru", "Analisis Sumatif"];
     
     const tlh = [
@@ -470,21 +473,41 @@
         }
     }
 
-    // Fungsi pembuat tabel rincian instrumen
-    function buildDetailTable(title, dataArr, aspekNames, hasCatatan) {
-        if (!dataArr || dataArr.length === 0) return '';
-        let html = `<div style="margin-top:15px; margin-bottom: 10px;"><strong style="color:var(--primary-dark);">${title}</strong>`;
-        html += `<table style="margin-top:8px; font-size:12px; background:white;"><thead><tr><th width="30">No</th><th>Aspek</th><th width="50">Nilai</th>`;
-        if (hasCatatan) html += `<th>Catatan</th>`;
-        html += `</tr></thead><tbody>`;
+    // Fungsi pembuat tabel rincian instrumen (MENGGUNAKAN GAYA FORM ASLI)
+    function buildDetailedFormTable(title, dataArr, aspekNames, hasCatatan) {
+        if (!dataArr || dataArr.length === 0) {
+            return `<div style="margin-top:20px;"><div class="section-title">${title}</div><p style="text-align:center; color:red; font-size:12px;">Data rincian tidak tersedia dari server.</p></div>`;
+        }
+
+        let html = `<div style="margin-top:25px;">
+                        <div class="section-title" style="margin-bottom:10px;">${title}</div>
+                        <table style="width:100%; border-collapse:collapse; background:white; font-size:13px;">
+                            <thead>
+                                <tr>
+                                    <th width="40">No</th>
+                                    <th>Aspek</th>
+                                    <th width="70">Nilai</th>`;
+        
+        if (hasCatatan) html += `<th width="200">Catatan</th>`;
+        html += `               </tr>
+                            </thead>
+                            <tbody>`;
         
         dataArr.forEach((item, i) => {
             let aspekText = aspekNames[i] || `Aspek ${i+1}`;
-            html += `<tr><td class="text-center">${i+1}</td><td>${aspekText}</td><td class="text-center"><b>${item.nilai || '-'}</b></td>`;
-            if (hasCatatan) html += `<td>${item.catatan || '-'}</td>`;
+            html += `<tr>
+                        <td class="text-center">${i+1}</td>
+                        <td>${aspekText}</td>
+                        <td class="text-center"><b>${item.nilai !== undefined && item.nilai !== "" ? item.nilai : '-'}</b></td>`;
+            if (hasCatatan) {
+                html += `<td>${item.catatan || ''}</td>`;
+            }
             html += `</tr>`;
         });
-        html += `</tbody></table></div>`;
+
+        html += `           </tbody>
+                        </table>
+                    </div>`;
         return html;
     }
 
@@ -504,7 +527,7 @@
                     let kelPel = x.kelebihanPelaksanaan || '-';
                     let sarPel = x.saranPelaksanaan || '-';
 
-                    // Parse JSON string dari Google Sheets menjadi Array agar bisa dilooping menjadi tabel
+                    // Parse data JSON nilai rincian yang ditarik dari Apps Script
                     let admData = [], tlhData = [], obsData = [];
                     try { admData = typeof x.administrasi === 'string' ? JSON.parse(x.administrasi) : (x.administrasi || []); } catch(e){}
                     try { tlhData = typeof x.telaah === 'string' ? JSON.parse(x.telaah) : (x.telaah || []); } catch(e){}
@@ -518,31 +541,34 @@
                                 <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
                             </div>
                             
-                            <button class="detail-btn" onclick="toggleDetail(${idx})">📄 Lihat Rincian Instrumen</button>
+                            <button class="detail-btn" onclick="toggleDetail(${idx})">📄 Lihat Rincian Instrumen Lengkap</button>
                             
-                            <div id="detail-${idx}" style="display:none; margin-top:15px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; max-height:450px; overflow-y:auto;">
-                                `;
+                            <!-- BUNGKUSAN DETAIL (Awalnya Sembunyi) -->
+                            <div id="detail-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                
+                                <!-- Render Komponen B -->
+                                ${buildDetailedFormTable("B. ADMINISTRASI (0-4)", admData, adm, false)}
+                                
+                                <!-- Render Komponen C -->
+                                ${buildDetailedFormTable("C. TELAAH PERENCANAAN (0-4)", tlhData, tlh, true)}
+                                
+                                <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
+                                    <strong style="color:var(--text-dark); font-size:13px;">Kelebihan Perencanaan pembelajaran:</strong><br>
+                                    <span style="font-size:13px; color:#475569;">${kelPer}</span><br><br>
+                                    <strong style="color:var(--text-dark); font-size:13px;">Hal yang perlu ditingkatkan dari Perencanaan Pembelajaran:</strong><br>
+                                    <span style="font-size:13px; color:#475569;">${sarPer}</span>
+                                </div>
 
-                    // Inject Tabel Administrasi
-                    if(admData.length > 0) h += buildDetailTable("B. ADMINISTRASI", admData, adm, false);
-                    
-                    // Inject Tabel Telaah Perencanaan
-                    if(tlhData.length > 0) h += buildDetailTable("C. TELAAH PERENCANAAN", tlhData, tlh, true);
+                                <!-- Render Komponen D -->
+                                ${buildDetailedFormTable("D. OBSERVASI PELAKSANAAN (0-4)", obsData, obs, true)}
+                                
+                                <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
+                                    <strong style="color:var(--text-dark); font-size:13px;">Kelebihan pelaksanaan pembelajaran:</strong><br>
+                                    <span style="font-size:13px; color:#475569;">${kelPel}</span><br><br>
+                                    <strong style="color:var(--text-dark); font-size:13px;">Hal yang perlu ditingkatkan dari pelaksanaan pembelajaran:</strong><br>
+                                    <span style="font-size:13px; color:#475569;">${sarPel}</span>
+                                </div>
 
-                    // Inject Kesimpulan Telaah
-                    h += `<div style="margin-top:10px; margin-bottom:20px; padding:10px; background:#fff; border:1px dashed #cbd5e1; border-radius:6px;">
-                            <span style="color:#059669;"><b>Kelebihan Perencanaan:</b></span> ${kelPer}<br>
-                            <span style="color:#ef4444;"><b>Perlu Ditingkatkan:</b></span> ${sarPer}
-                          </div>`;
-
-                    // Inject Tabel Observasi Pelaksanaan
-                    if(obsData.length > 0) h += buildDetailTable("D. OBSERVASI PELAKSANAAN", obsData, obs, true);
-
-                    // Inject Kesimpulan Pelaksanaan
-                    h += `<div style="margin-top:10px; padding:10px; background:#fff; border:1px dashed #cbd5e1; border-radius:6px;">
-                            <span style="color:#059669;"><b>Kelebihan Pelaksanaan:</b></span> ${kelPel}<br>
-                            <span style="color:#ef4444;"><b>Perlu Ditingkatkan:</b></span> ${sarPel}
-                          </div>
                             </div>
                         </div>`; 
                 }); 
