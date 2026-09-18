@@ -158,6 +158,9 @@
         .result-box { display: none; background: #ecfdf5; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; border: 1px solid #a7f3d0; }
         .card-result { border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         
+        .detail-btn { background: #e2e8f0; color: #334155; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .detail-btn:hover { background: #cbd5e1; }
+        
         #view-main, #view-refleksi { display: none; }
     </style>
 </head>
@@ -461,6 +464,15 @@
         document.getElementById(id).classList.add('active');
     }
 
+    function toggleDetail(idx) {
+        const detailDiv = document.getElementById('detail-' + idx);
+        if (detailDiv.style.display === 'none') {
+            detailDiv.style.display = 'block';
+        } else {
+            detailDiv.style.display = 'none';
+        }
+    }
+
     function doSearch(){
         const kw=document.getElementById('searchKeyword').value;
         if(!kw) return;
@@ -471,13 +483,34 @@
                 let c=document.getElementById('searchResults');
                 if(!res.data || res.data.length===0){ c.innerHTML='<p style="text-align:center; color:#ef4444;">Data tidak ditemukan.</p>'; return; }
                 let h=''; 
-                res.data.forEach(x=>{ 
+                res.data.forEach((x, idx)=>{ 
+                    // Menyiapkan variabel fallback jika Google Apps Script (GAS) Anda belum mengembalikan (return) nilai ini ke json
+                    let kelPer = x.kelebihanPerencanaan || '-';
+                    let sarPer = x.saranPerencanaan || '-';
+                    let kelPel = x.kelebihanPelaksanaan || '-';
+                    let sarPel = x.saranPelaksanaan || '-';
+
                     h+=`<div class="card-result">
                             <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${x.guru}</div>
                             <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">${x.sekolah} | Mapel: ${x.mapel}</div>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-size:13px;">Tgl: ${x.tanggal}</span>
                                 <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
+                            </div>
+                            
+                            <button class="detail-btn" onclick="toggleDetail(${idx})">📄 Lihat Rincian Instrumen</button>
+                            
+                            <div id="detail-${idx}" style="display:none; margin-top:15px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; font-size:13px;">
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color:var(--primary-dark);">Catatan Perencanaan:</strong><br>
+                                    <span style="color:#059669;">Kelebihan:</span> ${kelPer}<br>
+                                    <span style="color:#ef4444;">Perlu Ditingkatkan:</span> ${sarPer}
+                                </div>
+                                <div>
+                                    <strong style="color:var(--primary-dark);">Catatan Pelaksanaan:</strong><br>
+                                    <span style="color:#059669;">Kelebihan:</span> ${kelPel}<br>
+                                    <span style="color:#ef4444;">Perlu Ditingkatkan:</span> ${sarPel}
+                                </div>
                             </div>
                         </div>`; 
                 }); 
@@ -490,4 +523,3 @@
 </script>
 </body>
 </html>
-```[cite: 2]
