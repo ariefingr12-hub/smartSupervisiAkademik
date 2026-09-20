@@ -9,7 +9,6 @@
         :root {
             --primary: #3b82f6;
             --primary-dark: #1d4ed8;
-            /* Warna ungu sudah diubah jadi BIRU di bawah ini */
             --public: #3b82f6; 
             --public-dark: #1d4ed8;
             --accent: #10b981;
@@ -116,36 +115,6 @@
     </style>
 </head>
 <body>
-
-<script>
-    // Logika Cegatan Scan tetap ada kalau suatu saat dibutuhkan
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlScanTtd = urlParams.get('scanTtd');
-
-    if (urlScanTtd) {
-        const spvName = urlParams.get('spv') || 'Supervisor';
-        const guruName = urlParams.get('guru') || 'Guru';
-        const tglScan = urlParams.get('tgl') || '-';
-
-        document.body.style.background = "#f1f5f9";
-        document.body.style.display = "block";
-        document.body.style.padding = "20px";
-        document.body.innerHTML = `
-            <div style="background: white; max-width: 400px; margin: 40px auto; padding: 30px 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center;">
-                <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 20px;">Validasi Tanda Tangan</h2>
-                <p style="color: #64748b; font-size: 14px; margin-bottom: 25px; line-height: 1.5;">
-                    Dokumen Hasil Supervisi Akademik atas nama <b>${guruName}</b> (${tglScan}) dinyatakan sah.
-                </p>
-                <img src="gambar tandatangan_2.jpeg" alt="Tanda Tangan Fisik Supervisor" style="width: 100%; max-width: 250px; mix-blend-mode: multiply; margin-bottom: 5px;">
-                <h3 style="margin: 0; color: #0f172a; font-size: 16px;">${spvName}</h3>
-                <p style="margin: 2px 0 20px 0; color: #64748b; font-size: 12px;">Kepala Sekolah / Supervisor</p>
-                <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
-                <p style="color: #10b981; font-weight: bold; font-size: 13px; margin: 0;">✔ Terverifikasi SMART SUPERVISI</p>
-            </div>
-        `;
-        throw new Error("Menampilkan Halaman Scan Barcode Tanda Tangan"); 
-    }
-</script>
 
 <!-- LAYAR LOGIN -->
 <div id="view-login" class="glass-card">
@@ -311,6 +280,8 @@
     const ADMIN_PIN = "1234";
 
     let currentDataList = [];
+    
+    const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
 
     // Mencegat URL Refleksi
@@ -499,13 +470,18 @@
         } catch(e) { return isoString; }
     }
 
-    // FUNGSI PENCARIAN & LOAD GAMBAR BARCODE STATIS
+    // FUNGSI PENCARIAN & GENERATE QR CODE DINAMIS DARI LINK GDRIVE
     function doSearch(type){
         const kw = type === 'admin' ? document.getElementById('searchAdminKeyword').value : document.getElementById('searchPublicKeyword').value;
         const resultContainer = type === 'admin' ? document.getElementById('searchAdminResults') : document.getElementById('searchPublicResults');
         
         if(!kw) return;
         resultContainer.innerHTML='<p style="text-align:center; color:#666;">Mencari data...</p>';
+        
+        // Link Google Drive dari Anda yang akan diubah menjadi QR Code
+        const urlGoogleDrive = "https://drive.google.com/file/d/1qBLMnlTA4alZL4P526F4sCTFi1JsRzhb/view?usp=sharing";
+        // URL API untuk men-generate gambar QR code
+        const qrCodeImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlGoogleDrive)}`;
         
         fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(kw)}`)
             .then(res => res.json())
@@ -562,16 +538,15 @@
                                     <span style="font-size:13px; color:#475569;">${x.catatanKhusus || '-'}</span>
                                 </div>
 
-                                <!-- KOTAK TANDA TANGAN (GAMBAR BARCODE STATIS) -->
+                                <!-- KOTAK TANDA TANGAN (AUTO GENERATE QR CODE DARI GDRIVE LINK) -->
                                 <div class="signature-box" style="margin-top:25px;">
-                                    <!-- FILE GAMBAR BARCODE STATIS DIPANGGIL DI SINI -->
-                                    <img src="tandatanganbarcode.jpg" alt="Barcode Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;" onerror="this.style.display='none'">
+                                    <img src="${qrCodeImageSrc}" alt="QR Code Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;">
                                     
                                     <div class="signature-info">
                                         <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
                                         <p style="margin:4px 0 0 0; color:var(--text-muted);">${x.supervisor}</p>
                                         <p style="margin:4px 0 0 0; font-size:11px; color:#10b981;">
-                                            <b>✔ Tanda tangan digital disematkan</b>
+                                            <b>✔ Tanda tangan digital disematkan (Scan QR)</b>
                                         </p>
                                     </div>
                                 </div>
