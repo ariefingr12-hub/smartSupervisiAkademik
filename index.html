@@ -86,21 +86,21 @@
         th { background: #f1f5f9; text-align: center; color: var(--text-dark); font-weight: 700; }
         .text-center { text-align: center; }
 
-        .btn { padding: 14px; font-weight: 700; font-size: 14px; border: none; border-radius: 10px; cursor: pointer; color: white; width: 100%; display: inline-block; text-align: center; text-decoration: none; box-sizing: border-box; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .btn { padding: 12px 16px; font-weight: 700; font-size: 14px; border: none; border-radius: 10px; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; box-sizing: border-box; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15); }
+        .btn-full { width: 100%; }
         .btn-submit { background: var(--accent); }
         .btn-primary { background: var(--primary); }
-        .btn-wa { background: #25D366; margin-top: 12px; }
-        .btn-secondary { background: #64748b; margin-top: 10px; }
-        .btn-warning { background: #f59e0b; padding: 10px; font-size: 12px; }
+        .btn-wa { background: #25D366; }
+        .btn-secondary { background: #64748b; }
+        .btn-warning { background: #f59e0b; }
 
         .result-box { display: none; background: #ecfdf5; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; border: 1px solid #a7f3d0; }
         .card-result { border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         
-        .detail-btn { background: #e2e8f0; color: #334155; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; width: 100%; margin-top: 12px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .detail-btn { background: #e2e8f0; color: #334155; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .detail-btn:hover { background: #cbd5e1; }
         
-        /* Area Tanda Tangan */
         .signature-box { margin-top: 20px; padding: 15px; background: #ffffff; border: 1px dashed var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
         .signature-info { flex: 1; text-align: left; font-size: 12px; color: var(--text-dark); }
         
@@ -122,9 +122,9 @@
             <label style="text-align: center; width: 100%;">Masukkan PIN Akses Admin K3S</label>
             <input type="password" id="adminPin" class="pin-input" placeholder="••••" maxlength="6">
         </div>
-        <button class="btn btn-primary" onclick="loginAdmin()">MASUK PANEL K3S</button>
+        <button class="btn btn-primary btn-full" onclick="loginAdmin()">MASUK PANEL K3S</button>
         <div style="margin: 15px 0; color: var(--text-muted); font-size: 12px;">— ATAU —</div>
-        <button class="btn btn-secondary" onclick="openPublicPortal()">🔍 Akses Portal Cari Hasil Guru</button>
+        <button class="btn btn-secondary btn-full" onclick="openPublicPortal()">🔍 Akses Portal Hasil Guru (Publik)</button>
     </div>
 </div>
 
@@ -132,11 +132,11 @@
 <div id="view-main" class="glass-card">
     <div class="top-bar">
         <div class="nav-tabs">
-            <!-- TAB ADMIN -->
+            <!-- TAB KHUSUS ADMIN K3S -->
             <button class="tab-btn active" id="btn-tab-input" onclick="switchTab('tab-input', event)">📝 Input Baru</button>
-            <button class="tab-btn" id="btn-tab-admin-edit" onclick="switchTab('tab-admin-edit', event)">🛠️ Kelola Data</button>
-            <!-- TAB PUBLIK -->
-            <button class="tab-btn" id="btn-tab-portal" onclick="switchTab('tab-portal', event)">🔍 Cek Hasil</button>
+            <button class="tab-btn" id="btn-tab-admin-edit" onclick="switchTab('tab-admin-edit', event)">🛠️ Kelola Data & Edit</button>
+            <!-- TAB KHUSUS PUBLIK -->
+            <button class="tab-btn" id="btn-tab-portal" onclick="switchTab('tab-portal', event)">🔍 Cek Hasil Supervisi</button>
         </div>
         <button class="btn-logout" onclick="logout()">🔒 Keluar</button>
     </div>
@@ -146,7 +146,7 @@
         <h2 class="header-title" style="font-size: 20px;">SMART SUPERVISI AKADEMIK</h2>
     </div>
 
-    <!-- TAB INPUT SUPERVISI FULL (Khusus Admin) -->
+    <!-- TAB INPUT SUPERVISI FULL (Khusus Admin K3S) -->
     <div id="tab-input" class="tab-content active">
         <form id="supervisiForm">
             <div class="section-title">A. IDENTITAS & KONTAK GURU</div>
@@ -155,7 +155,7 @@
                 <div class="form-group"><label>Nama Pendidik (Guru)</label><input type="text" id="guru" required></div>
                 <div class="form-group"><label>NIP / ID Guru</label><input type="text" id="nipGuru"></div>
                 <div class="form-group"><label>Email Guru</label><input type="email" id="emailGuru"></div>
-                <div class="form-group"><label>No. WhatsApp Guru</label><input type="text" id="waGuru" placeholder="08xxx"></div>
+                <div class="form-group"><label>No. WhatsApp Guru</label><input type="text" id="waGuru" placeholder="08xxx / 628xxx" required></div>
                 <div class="form-group"><label>Nama Sekolah Target</label><input type="text" id="sekolah" required></div>
                 <div class="form-group"><label>Mata Pelajaran / Kelas</label><input type="text" id="mapel" required></div>
                 <div class="form-group"><label>Hari / Tanggal Supervisi</label><input type="date" id="tanggal" required></div>
@@ -184,22 +184,24 @@
             <div class="section-title">E. CATATAN KHUSUS SUPERVISOR</div>
             <div class="form-group">
                 <label>Catatan Khusus / Rekomendasi Umum Supervisor:</label>
-                <textarea id="catatanKhusus" rows="3" placeholder="Tuliskan catatan khusus, arahan khusus, atau rekomendasi umum untuk guru..."></textarea>
+                <textarea id="catatanKhusus" rows="3" placeholder="Tuliskan catatan khusus atau rekomendasi untuk guru..."></textarea>
             </div>
 
-            <button type="submit" class="btn btn-submit" id="btnSubmit">SIMPAN DATA SUPERVISI</button>
+            <button type="submit" class="btn btn-submit btn-full" id="btnSubmit">SIMPAN DATA SUPERVISI</button>
         </form>
 
         <div id="resultBox" class="result-box">
             <h3 style="color: var(--accent); margin:0 0 10px 0;">Data Berhasil Disimpan!</h3>
             <p style="margin: 5px 0;">Nilai Akhir: <b id="resNilai" style="font-size:20px;"></b> (<span id="resPredikat"></span>)</p>
-            <a id="btnWaDirect" href="#" target="_blank" class="btn btn-wa">📱 Kirim Pesan & Link Refleksi via WhatsApp</a>
+            <div style="margin-top:15px;">
+                <a id="btnWaDirect" href="#" target="_blank" class="btn btn-wa btn-full">📱 Kirim Laporan & Link Refleksi via WhatsApp</a>
+            </div>
         </div>
     </div>
 
-    <!-- TAB KELOLA DATA (Khusus Admin - Ada Tombol Edit) -->
+    <!-- TAB KELOLA DATA (Khusus Admin K3S - Lengkap Fitur Edit & Kirim WA) -->
     <div id="tab-admin-edit" class="tab-content">
-        <div class="section-title">MANAJEMEN & EDIT DATA SUPERVISI</div>
+        <div class="section-title">MANAJEMEN, EDIT & KIRIM LAPORAN SUPERVISI</div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <input type="text" id="searchAdminKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);">
             <button class="btn btn-warning" style="width:110px;" onclick="doSearch('admin')">Cari</button>
@@ -207,9 +209,9 @@
         <div id="searchAdminResults"></div>
     </div>
 
-    <!-- TAB PORTAL CARI (Khusus Publik - Tanpa Tombol Edit) -->
+    <!-- TAB PORTAL CARI (Khusus Publik/Guru - MURNI HANYA BISA LIHAT RINCIAN) -->
     <div id="tab-portal" class="tab-content">
-        <div class="section-title">PORTAL PENCARIAN HASIL SUPERVISI</div>
+        <div class="section-title">PORTAL PENCARIAN HASIL SUPERVISI GURU</div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <input type="text" id="searchPublicKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);">
             <button class="btn btn-primary" style="width:110px;" onclick="doSearch('public')">Cari</button>
@@ -218,7 +220,7 @@
     </div>
 </div>
 
-<!-- LAYAR EDIT DATA (Panel Popup K3S) -->
+<!-- LAYAR EDIT DATA (Hanya Dipanggil dari Panel K3S) -->
 <div id="view-edit" class="glass-card">
     <div class="top-bar">
         <button class="btn btn-secondary" style="width: auto; margin:0;" onclick="closeEdit()">🔙 Kembali</button>
@@ -238,7 +240,7 @@
         <div class="section-title">D. REVISI OBSERVASI PELAKSANAAN (0-4)</div>
         <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="70">Nilai</th><th>Catatan</th></tr></thead><tbody id="edit-tb-observasi"></tbody></table>
 
-        <button type="submit" class="btn btn-warning" id="btnUpdate">SIMPAN PERUBAHAN DATA</button>
+        <button type="submit" class="btn btn-warning btn-full" id="btnUpdate">SIMPAN PERUBAHAN DATA</button>
     </form>
 </div>
 
@@ -259,7 +261,7 @@
             <label>2. Apa Rencana Tindak Lanjut (RTL) perbaikan Anda?</label>
             <textarea id="val-rtl" rows="4" required placeholder="Tuliskan rencana perbaikan ke depannya..."></textarea>
         </div>
-        <button type="submit" class="btn btn-primary" id="btnKirimRefleksi">KIRIM REFLEKSI</button>
+        <button type="submit" class="btn btn-primary btn-full" id="btnKirimRefleksi">KIRIM REFLEKSI</button>
     </form>
     <div id="refleksiSuccess" class="result-box">
         <h3 style="color: var(--accent); margin:0;">Terima Kasih!</h3>
@@ -320,7 +322,7 @@
             document.getElementById('view-login').style.display = 'none';
             document.getElementById('view-main').style.display = 'block';
             
-            // Tampilkan menu Admin, sembunyikan menu Publik
+            // Tampilkan menu Admin K3S
             document.getElementById('btn-tab-input').style.display = 'block';
             document.getElementById('btn-tab-admin-edit').style.display = 'block';
             document.getElementById('btn-tab-portal').style.display = 'none';
@@ -332,7 +334,7 @@
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-main').style.display = 'block';
         
-        // Tampilkan menu Publik, sembunyikan menu Admin
+        // Sembunyikan menu Admin, Hanya tampilkan Tab Portal Hasil
         document.getElementById('btn-tab-input').style.display = 'none';
         document.getElementById('btn-tab-admin-edit').style.display = 'none';
         document.getElementById('btn-tab-portal').style.display = 'block';
@@ -401,10 +403,16 @@
                 document.getElementById('resultBox').style.display='block';
                 document.getElementById('resNilai').innerText=res.nilaiAkhir; 
                 document.getElementById('resPredikat').innerText=res.predikat;
-                if(res.waUrl) { 
-                    document.getElementById('btnWaDirect').href=res.waUrl; 
-                    document.getElementById('btnWaDirect').style.display='inline-block'; 
-                } else { document.getElementById('btnWaDirect').style.display='none'; }
+                
+                // BUAT LINK WA SECARA OTOMATIS
+                let rawWa = document.getElementById('waGuru').value.replace(/[^0-9]/g, '');
+                if(rawWa.startsWith('0')) rawWa = '62' + rawWa.slice(1);
+                
+                const linkRefleksi = `${vercelBaseUrl}?refleksi=${res.idTx || ''}`;
+                const msgWA = `Yth. Bapak/Ibu ${document.getElementById('guru').value},\n\nHasil Supervisi Akademik Anda telah selesai dicatat:\n- Tanggal: ${formatTanggal(document.getElementById('tanggal').value)}\n- Nilai Akhir: ${res.nilaiAkhir} (${res.predikat})\n- Supervisor: ${document.getElementById('supervisor').value}\n\nMohon untuk mengisi Form Refleksi & RTL melalui tautan berikut:\n${linkRefleksi}\n\nTerima kasih.`;
+                const finalWaUrl = res.waUrl || `https://api.whatsapp.com/send?phone=${rawWa}&text=${encodeURIComponent(msgWA)}`;
+
+                document.getElementById('btnWaDirect').href = finalWaUrl; 
                 document.getElementById('supervisiForm').reset();
             } else alert('Error: '+res.message);
         }).catch(() => {
@@ -453,7 +461,7 @@
         } catch(e) { return isoString; }
     }
 
-    // FUNGSI PENCARIAN TERPISAH (Satu untuk Admin, Satu untuk Publik)
+    // FUNGSI PENCARIAN TERPISAH (SEKALI LAGI Ditegaskan: PUBLIC TIDAK BISA EDIT)
     function doSearch(type){
         const kw = type === 'admin' ? document.getElementById('searchAdminKeyword').value : document.getElementById('searchPublicKeyword').value;
         const resultContainer = type === 'admin' ? document.getElementById('searchAdminResults') : document.getElementById('searchPublicResults');
@@ -478,10 +486,23 @@
                     const qrContent = encodeURIComponent(`SAH SUPERVISI\nSupervisor: ${x.supervisor}\nGuru: ${x.guru}\nTgl: ${tanggalRapi}\nNilai: ${x.nilaiAkhir}`);
                     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrContent}`;
 
-                    // HANYA RENDER TOMBOL EDIT JIKA TYPE = ADMIN
-                    let actionButtonsHtml = `<button class="detail-btn" style="margin:0;" onclick="toggleDetail(${idx}, '${type}')">📄 Rincian</button>`;
+                    // UNTUK PUBLIK: HANYA DIBERIKAN TOMBOL "LIHAT RINCIAN"
+                    let actionButtonsHtml = `<button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>`;
+                    
+                    // UNTUK ADMIN (PANEL K3S): DIBERIKAN TOMBOL "KIRIM WA REPORT" & "EDIT NILAI"
                     if (type === 'admin') {
-                        actionButtonsHtml += `<button class="btn btn-warning" style="margin:0; width:100px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>`;
+                        let cleanWa = (x.waGuru || '').replace(/[^0-9]/g, '');
+                        if(cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
+                        
+                        const vercelBaseUrl = window.location.origin + window.location.pathname;
+                        const linkRefleksi = `${vercelBaseUrl}?refleksi=${x.idTx || ''}`;
+                        const msgWA = `Yth. Bapak/Ibu ${x.guru},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${x.nilaiAkhir} (${x.predikat})\n- Supervisor: ${x.supervisor}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
+                        const waUrl = `https://api.whatsapp.com/send?phone=${cleanWa}&text=${encodeURIComponent(msgWA)}`;
+
+                        actionButtonsHtml += `
+                            <a href="${waUrl}" target="_blank" class="btn btn-wa" style="padding:10px 14px; font-size:12px;">📱 Kirim WA Report</a>
+                            <button class="btn btn-warning" style="padding:10px 14px; font-size:12px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>
+                        `;
                     }
 
                     h+=`<div class="card-result">
@@ -492,7 +513,7 @@
                                 <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
                             </div>
                             
-                            <div style="display:flex; gap:10px; margin-top:12px;">
+                            <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap;">
                                 ${actionButtonsHtml}
                             </div>
                             
@@ -535,7 +556,7 @@
             }).catch(() => { resultContainer.innerHTML = '<p style="text-align:center; color:#ef4444;">Gagal terhubung ke server.</p>'; });
     }
 
-    // FUNGSI MEMBUKA FORM EDIT (Hanya Dipanggil dari Tab Admin)
+    // MEMBUKA FORM EDIT (HANYA DARI PANEL K3S)
     function openEdit(idx) {
         const data = currentDataList[idx];
         document.getElementById('view-main').style.display = 'none';
@@ -581,7 +602,7 @@
         e.preventDefault();
         
         let idTx = document.getElementById('edit-idTx').value;
-        if (!idTx) { alert("ID Transaksi tidak ditemukan! Pastikan Google Apps Script (Backend) Anda memunculkan data 'idTx' saat pencarian."); return; }
+        if (!idTx) { alert("ID Transaksi tidak ditemukan!"); return; }
 
         document.getElementById('btnUpdate').innerText = 'Memperbarui Data...';
         
