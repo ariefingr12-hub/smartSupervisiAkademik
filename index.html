@@ -92,7 +92,7 @@
         .btn-primary { background: var(--primary); }
         .btn-wa { background: #25D366; margin-top: 12px; }
         .btn-secondary { background: #64748b; margin-top: 10px; }
-        .btn-warning { background: #f59e0b; padding: 10px; font-size: 12px; } /* Tombol Edit */
+        .btn-warning { background: #f59e0b; padding: 10px; font-size: 12px; }
 
         .result-box { display: none; background: #ecfdf5; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; border: 1px solid #a7f3d0; }
         .card-result { border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -133,14 +133,14 @@
     <div class="top-bar">
         <div class="nav-tabs">
             <button class="tab-btn active" id="btn-tab-input" onclick="switchTab('tab-input', event)">📝 Input Baru</button>
-            <button class="tab-btn" id="btn-tab-portal" onclick="switchTab('tab-portal', event)">🔍 Cek & Edit Hasil</button>
+            <button class="tab-btn" id="btn-tab-portal" onclick="switchTab('tab-portal', event)">🔍 Cek Hasil</button>
         </div>
         <button class="btn-logout" onclick="logout()">🔒 Keluar</button>
     </div>
 
     <div class="header-container" style="margin-bottom: 15px;">
         <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
-        <h2 class="header-title" style="font-size: 20px;">SMART SUPERVISI AKADEMIK (FORMAT SILANG)</h2>
+        <h2 class="header-title" style="font-size: 20px;">SMART SUPERVISI AKADEMIK</h2>
     </div>
 
     <!-- TAB INPUT SUPERVISI FULL -->
@@ -196,7 +196,7 @@
 
     <!-- TAB PORTAL CARI -->
     <div id="tab-portal" class="tab-content">
-        <div class="section-title">CARI & KELOLA HASIL SUPERVISI</div>
+        <div class="section-title">CARI HASIL SUPERVISI</div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <input type="text" id="searchKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);">
             <button class="btn btn-primary" style="width:110px;" onclick="doSearch()">Cari</button>
@@ -213,7 +213,7 @@
     </div>
     
     <form id="editForm">
-        <input type="hidden" id="edit-idTx"> <!-- ID unik dari spreadsheet untuk update -->
+        <input type="hidden" id="edit-idTx"> 
         <div class="section-title" id="edit-header-info">Mengedit Data: -</div>
         
         <div class="section-title">B. REVISI ADMINISTRASI (0-4)</div>
@@ -260,6 +260,7 @@
     const ADMIN_PIN = "1234";
 
     let currentDataList = [];
+    let isAdminLoggedIn = false; // VARIABEL PENGUNCI AKSES EDIT
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
@@ -304,6 +305,7 @@
 
     function loginAdmin() {
         if (document.getElementById('adminPin').value === ADMIN_PIN) {
+            isAdminLoggedIn = true; // Set Admin True
             document.getElementById('view-login').style.display = 'none';
             document.getElementById('view-main').style.display = 'block';
             document.getElementById('btn-tab-input').style.display = 'block';
@@ -312,6 +314,7 @@
     }
 
     function openPublicPortal() {
+        isAdminLoggedIn = false; // Set Admin False
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-main').style.display = 'block';
         document.getElementById('btn-tab-input').style.display = 'none'; 
@@ -319,9 +322,12 @@
     }
 
     function logout() {
+        isAdminLoggedIn = false; // Reset akses saat keluar
         document.getElementById('view-main').style.display = 'none';
         document.getElementById('view-login').style.display = 'block';
         document.getElementById('adminPin').value = '';
+        document.getElementById('searchResults').innerHTML = ''; // Bersihkan pencarian lama
+        document.getElementById('searchKeyword').value = '';
     }
 
     const adm = ["CP", "ATP", "Prosem", "Rencana Pembelajaran / Modul Ajar", "Perencanaan Kokurikuler ", "KKTP", "Kalender Pendidikan Sekolah ", "Buku inventaris kelas", "Jadwal Pelajaran", "Kisi-Kisi dan Soal", "Daftar Nilai Murid", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal harian Guru", "Analisis Sumatif"];
@@ -416,6 +422,19 @@
         html += `</tbody></table></div>`; return html;
     }
 
+    function formatTanggal(isoString) {
+        if (!isoString) return '-';
+        try {
+            const d = new Date(isoString);
+            if (isNaN(d.getTime())) return isoString; // Jika bukan format tanggal valid, kembalikan teks aslinya
+            
+            const hari = d.getDate().toString().padStart(2, '0');
+            const bulan = (d.getMonth() + 1).toString().padStart(2, '0');
+            const tahun = d.getFullYear();
+            return `${hari}-${bulan}-${tahun}`;
+        } catch(e) { return isoString; }
+    }
+
     function doSearch(){
         const kw=document.getElementById('searchKeyword').value;
         if(!kw) return;
@@ -434,20 +453,27 @@
                     try { tlhData = typeof x.telaah === 'string' ? JSON.parse(x.telaah) : (x.telaah || []); } catch(e){}
                     try { obsData = typeof x.observasi === 'string' ? JSON.parse(x.observasi) : (x.observasi || []); } catch(e){}
 
-                    const qrContent = encodeURIComponent(`SAH SUPERVISI\nSupervisor: ${x.supervisor}\nGuru: ${x.guru}\nTgl: ${x.tanggal}\nNilai: ${x.nilaiAkhir}`);
+                    const tanggalRapi = formatTanggal(x.tanggal);
+
+                    const qrContent = encodeURIComponent(`SAH SUPERVISI\nSupervisor: ${x.supervisor}\nGuru: ${x.guru}\nTgl: ${tanggalRapi}\nNilai: ${x.nilaiAkhir}`);
                     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrContent}`;
+
+                    // LOGIKA PENYEMBUNYIAN TOMBOL EDIT BERDASARKAN STATUS LOGIN K3S
+                    let editButtonHtml = isAdminLoggedIn 
+                        ? `<button class="btn btn-warning" style="margin:0; width:100px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>` 
+                        : '';
 
                     h+=`<div class="card-result">
                             <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${x.guru}</div>
                             <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">${x.sekolah} | Mapel: ${x.mapel}</div>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:13px;">Tgl: ${x.tanggal}</span>
+                                <span style="font-size:13px;">Tgl: ${tanggalRapi}</span>
                                 <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
                             </div>
                             
                             <div style="display:flex; gap:10px; margin-top:12px;">
                                 <button class="detail-btn" style="margin:0;" onclick="toggleDetail(${idx})">📄 Rincian</button>
-                                <button class="btn btn-warning" style="margin:0; width:100px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>
+                                ${editButtonHtml}
                             </div>
                             
                             <div id="detail-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto;">
@@ -496,7 +522,7 @@
         document.getElementById('view-edit').style.display = 'block';
         
         document.getElementById('edit-idTx').value = data.idTx || ""; 
-        document.getElementById('edit-header-info').innerText = `Mengedit Data: ${data.guru} (${data.tanggal})`;
+        document.getElementById('edit-header-info').innerText = `Mengedit Data: ${data.guru} (${formatTanggal(data.tanggal)})`;
 
         let admData = []; let tlhData = []; let obsData = [];
         try { admData = typeof data.administrasi === 'string' ? JSON.parse(data.administrasi) : (data.administrasi || []); } catch(e){}
