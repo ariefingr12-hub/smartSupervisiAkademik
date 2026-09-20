@@ -112,6 +112,24 @@
         .signature-info { flex: 1; text-align: left; font-size: 12px; color: var(--text-dark); }
         
         #view-main, #view-refleksi, #view-edit { display: none; }
+        #print-area { display: none; }
+
+        /* PENGATURAN KHUSUS UNTUK CETAK PDF */
+        @media print {
+            body { background: white !important; margin: 0; padding: 0; color: black !important; }
+            #view-login, #view-main, #view-edit, #view-refleksi { display: none !important; }
+            #print-area { display: block !important; width: 100%; padding: 20px; }
+            
+            table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
+            th, td { border: 1px solid #000 !important; padding: 8px; font-size: 12px; color: black; }
+            th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            .section-title { background: #e2e8f0 !important; color: black !important; border: 1px solid #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; page-break-after: avoid; }
+            .signature-box { border: 1px solid #000 !important; page-break-inside: avoid; }
+            
+            /* Sembunyikan elemen scroll & UI pada saat cetak */
+            div[id^="detail-"] { max-height: none !important; overflow: visible !important; border: none !important; padding: 0 !important; background: transparent !important; }
+        }
     </style>
 </head>
 <body>
@@ -204,7 +222,7 @@
         </div>
     </div>
 
-    <!-- TAB KELOLA DATA (DENGAN TOMBOL EDIT/WA) -->
+    <!-- TAB KELOLA DATA -->
     <div id="tab-admin-edit" class="tab-content">
         <div class="section-title">MANAJEMEN, EDIT & KIRIM LAPORAN SUPERVISI</div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -214,10 +232,9 @@
         <div id="searchAdminResults"></div>
     </div>
 
-    <!-- PORTAL PENCARIAN (TANPA EDIT) -->
+    <!-- PORTAL PENCARIAN -->
     <div id="tab-portal" class="tab-content">
         <div class="section-title section-title-public">PORTAL PUBLIK: PENCARIAN HASIL SUPERVISI GURU</div>
-        <p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:-5px; margin-bottom:15px;">(Fitur Edit dan Kirim WA Dinonaktifkan di Area Publik)</p>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
             <input type="text" id="searchPublicKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:2px solid var(--public-dark);">
             <button class="btn btn-public" style="width:110px;" onclick="doSearch('public')">Cari</button>
@@ -226,7 +243,7 @@
     </div>
 </div>
 
-<!-- LAYAR EDIT DATA (POPUP KHUSUS PANEL K3S) -->
+<!-- LAYAR EDIT DATA -->
 <div id="view-edit" class="glass-card">
     <div class="top-bar">
         <button class="btn btn-secondary" style="width: auto; margin:0;" onclick="closeEdit()">🔙 Batal / Kembali</button>
@@ -250,14 +267,14 @@
     </form>
 </div>
 
-<!-- LAYAR REFLEKSI GURU (DIBUKA VIA WA) -->
+<!-- LAYAR REFLEKSI GURU -->
 <div id="view-refleksi" class="glass-card" style="max-width: 500px;">
+    <!-- Bagian Refleksi Tetap Sama -->
     <div class="header-container">
         <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
         <h2 class="header-title">Form Refleksi Guru</h2>
         <p class="header-subtitle" id="refleksiSubtitle">Memuat data...</p>
     </div>
-    
     <form id="refleksiForm" style="display:none;">
         <div class="form-group">
             <label>1. Bagaimana perasaan/kendala Anda saat disupervisi?</label>
@@ -275,6 +292,9 @@
     </div>
 </div>
 
+<!-- AREA KHUSUS UNTUK CETAK PDF -->
+<div id="print-area"></div>
+
 <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyHbaB9x0H5VQdtqqPyVPvbWtyaFosOTQBbCyvF28VaSTByBFlFtjYmm4Uho-3HILtS/exec";
     const ADMIN_PIN = "1234";
@@ -284,7 +304,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
 
-    // Mencegat URL Refleksi
     if (urlRefleksiId) {
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-refleksi').style.display = 'block';
@@ -323,7 +342,6 @@
         });
     }
 
-    // LOGIN ADMIN K3S
     function loginAdmin() {
         if (document.getElementById('adminPin').value === ADMIN_PIN) {
             document.getElementById('view-login').style.display = 'none';
@@ -335,7 +353,6 @@
         } else { alert('PIN Admin Salah! Silakan coba lagi.'); }
     }
 
-    // MASUK PORTAL PUBLIK
     function openPublicPortal() {
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-main').style.display = 'block';
@@ -345,7 +362,6 @@
         switchTab('tab-portal', null, 'public');
     }
 
-    // LOGOUT
     function logout() {
         document.getElementById('view-main').style.display = 'none';
         document.getElementById('view-login').style.display = 'block';
@@ -354,7 +370,6 @@
         document.getElementById('searchPublicResults').innerHTML = ''; 
     }
 
-    // NAVIGASI TAB
     function switchTab(id, e, type = 'admin') {
         document.querySelectorAll('.tab-btn').forEach(b => {
             b.classList.remove('active');
@@ -368,7 +383,6 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // DATA ASPEK
     const adm = ["CP", "ATP", "Prosem", "Rencana Pembelajaran / Modul Ajar", "Perencanaan Kokurikuler ", "KKTP", "Kalender Pendidikan Sekolah ", "Buku inventaris kelas", "Jadwal Pelajaran", "Kisi-Kisi dan Soal", "Daftar Nilai Murid", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal harian Guru", "Analisis Sumatif"];
     const tlh = ["Tujuan, kegiatan, dan asesmen saling mendukung.", "Tujuan pembelajaran mengarah pada Dimensi Profil Lulusan.", "Kegiatan yang direncanakan sesuai dengan cara/model pembelajaran yang dipilih.", "Lingkungan belajar yang direncanakan mendukung murid belajar.", "Kerja sama/interaksi murid direncanakan. Ada kegiatan berpasangan/kelompok atau bentuk kemitraan lain", "Pemanfaatan digital yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran", "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEMAHAMI", "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MENGAPLIKASI", "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEREFLEKSI", "Bahasa, sikap, dan kegiatan menunjukkan saling menghormati dan memuliakan", "Prinsip pembelajaran mendalam berupa berkesadaran, bermakna, dan/atau menggembirakan sudah tergambar", "Perencanaan pembelajaran sudah mengakomodir pengalaman belajar", "Ada cara mengetahui pengetahuan awal, kesiapan, atau kebutuhan belajar murid", "Ada cara memantau proses, memberi umpan balik, dan memperbaiki pembelajaran. (asesmen formatif)", "Asesmen akhir sesuai dengan tujuan pembelajaran"];
     const obs = ["Kegiatan awal, inti, dan penutup sesuai/menyesuaikan rencana secara wajar", "Murid mengetahui apa yang dipelajari/dikerjakan; kegiatan mengarah ke tujuan.", "Murid bertanya, menjawab, berdiskusi, mencoba, mengerjakan, atau berpikir; guru tidak dominan ceramah.", "Ruang kelas rapi, aman, dan posisi duduk mendukung interaksi belajar", "Murid saling mendengarkan, berbagi tugas, membantu, dan bekerja sama.", "Media/alat peraga/aplikasi benar-benar dipakai oleh guru/murid", "Guru menyapa murid dengan ramah, adil memanggil murid", "Guru mengaitkan materi dengan pengetahuan sebelumnya", "Murid mencoba, mempraktikkan, berdiskusi, menggunakan konsep", "Murid menyimpulkan, menyampaikan yang sudah/belum dipahami", "Pembelajaran terasa berkesadaran, bermakna, dan/atau menggembirakan", "Guru menyesuaikan penjelasan, tugas, bantuan, pengelompokan", "Guru mengecek kesiapan, pengetahuan awal, atau kebutuhan murid", "Guru memantau saat murid bekerja, memberikan pujian/koreksi", "Ada bukti pencapaian tujuan/kompetensi melalui tes, praktik, proyek"];
@@ -384,7 +398,6 @@
         vals.forEach((v,i)=> r.push({nilai:v.value, catatan:note?nots[i].value:""})); return r;
     }
 
-    // SIMPAN DATA BARU
     document.getElementById('supervisiForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const bAdmin = parseFloat(document.getElementById('bobotAdmin').value) || 0;
@@ -444,6 +457,36 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
+    // FUNGSI UNTUK CETAK PDF
+    function cetakPDF(idx, type) {
+        const data = currentDataList[idx];
+        const detailDiv = document.getElementById(`detail-${type}-${idx}`);
+        
+        // Buat layout khusus cetak
+        const printHtml = `
+            <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+                <h2 style="margin: 0;">LAPORAN HASIL SUPERVISI AKADEMIK</h2>
+                <h3 style="margin: 5px 0 0 0; color: #333;">${data.sekolah}</h3>
+            </div>
+            
+            <table style="width:100%; margin-bottom:20px; border:none;">
+                <tr><td style="border:none; padding:4px; width:150px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${data.guru}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>NIP</b></td><td style="border:none; padding:4px;">: ${data.nipGuru || '-'}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Mata Pelajaran</b></td><td style="border:none; padding:4px;">: ${data.mapel}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Tanggal Supervisi</b></td><td style="border:none; padding:4px;">: ${formatTanggal(data.tanggal)}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nama Supervisor</b></td><td style="border:none; padding:4px;">: ${data.supervisor}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nilai Akhir</b></td><td style="border:none; padding:4px; font-size:16px;">: <b>${data.nilaiAkhir} (${data.predikat})</b></td></tr>
+            </table>
+
+            <!-- Ambil isi rincian aspek -->
+            ${detailDiv.innerHTML}
+        `;
+        
+        // Masukkan ke area print lalu panggil print dialog
+        document.getElementById('print-area').innerHTML = printHtml;
+        window.print();
+    }
+
     function buildDetailedFormTable(title, dataArr, aspekNames, hasCatatan) {
         if (!dataArr || dataArr.length === 0) return `<div style="margin-top:20px;"><div class="section-title">${title}</div><p style="text-align:center; color:red; font-size:12px;">Data rincian tidak tersedia.</p></div>`;
         let html = `<div style="margin-top:25px;"><div class="section-title" style="margin-bottom:10px;">${title}</div><table style="width:100%; border-collapse:collapse; background:white; font-size:13px;"><thead><tr><th width="40">No</th><th>Aspek</th><th width="70">Nilai</th>`;
@@ -470,7 +513,6 @@
         } catch(e) { return isoString; }
     }
 
-    // FUNGSI PENCARIAN & GENERATE QR CODE DINAMIS DARI LINK GDRIVE
     function doSearch(type){
         const kw = type === 'admin' ? document.getElementById('searchAdminKeyword').value : document.getElementById('searchPublicKeyword').value;
         const resultContainer = type === 'admin' ? document.getElementById('searchAdminResults') : document.getElementById('searchPublicResults');
@@ -478,9 +520,7 @@
         if(!kw) return;
         resultContainer.innerHTML='<p style="text-align:center; color:#666;">Mencari data...</p>';
         
-        // Link Google Drive dari Anda yang akan diubah menjadi QR Code
         const urlGoogleDrive = "https://drive.google.com/file/d/1qBLMnlTA4alZL4P526F4sCTFi1JsRzhb/view?usp=sharing";
-        // URL API untuk men-generate gambar QR code
         const qrCodeImageSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlGoogleDrive)}`;
         
         fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(kw)}`)
@@ -499,7 +539,11 @@
                     const tanggalRapi = formatTanggal(x.tanggal);
                     const vercelBaseUrl = window.location.origin + window.location.pathname;
                     
-                    let actionButtonsHtml = `<button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>`;
+                    // TOMBOL LIHAT RINCIAN & CETAK PDF
+                    let actionButtonsHtml = `
+                        <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
+                        <button class="btn btn-primary" style="padding:10px 14px; font-size:12px;" onclick="cetakPDF(${idx}, '${type}')">🖨️ Cetak / Simpan PDF</button>
+                    `;
                     
                     if (type === 'admin') {
                         let cleanWa = (x.waGuru || '').replace(/[^0-9]/g, '');
@@ -538,10 +582,8 @@
                                     <span style="font-size:13px; color:#475569;">${x.catatanKhusus || '-'}</span>
                                 </div>
 
-                                <!-- KOTAK TANDA TANGAN (AUTO GENERATE QR CODE DARI GDRIVE LINK) -->
                                 <div class="signature-box" style="margin-top:25px;">
                                     <img src="${qrCodeImageSrc}" alt="QR Code Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;">
-                                    
                                     <div class="signature-info">
                                         <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
                                         <p style="margin:4px 0 0 0; color:var(--text-muted);">${x.supervisor}</p>
@@ -558,7 +600,6 @@
             }).catch(() => { resultContainer.innerHTML = '<p style="text-align:center; color:#ef4444;">Gagal terhubung ke server.</p>'; });
     }
 
-    // MEMBUKA FORM EDIT 
     function openEdit(idx) {
         const data = currentDataList[idx];
         document.getElementById('view-main').style.display = 'none';
@@ -599,7 +640,6 @@
         vals.forEach((v,i)=> r.push({nilai:v.value, catatan:useNote?nots[i].value:""})); return r;
     }
 
-    // UPDATE DATA KE GAS
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         let idTx = document.getElementById('edit-idTx').value;
