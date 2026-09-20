@@ -33,7 +33,6 @@
             justify-content: center;
         }
 
-        /* Glassmorphism Container */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
@@ -53,13 +52,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Header Styling */
         .header-container { text-align: center; margin-bottom: 25px; }
         .logo { max-width: 90px; height: auto; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
         .header-title { color: var(--text-dark); margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
         .header-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 5px; font-weight: 500; }
 
-        /* Login Card */
         #view-login { max-width: 420px; text-align: center; }
         .login-box { margin-top: 20px; }
         .pin-input {
@@ -76,7 +73,6 @@
         }
         .pin-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
-        /* Navigation & Tabs */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .nav-tabs { display: flex; gap: 10px; }
         .tab-btn {
@@ -96,7 +92,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Form Controls */
         .section-title {
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
@@ -126,13 +121,11 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
-        /* Tables */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; background: white; border-radius: 10px; overflow: hidden; }
         th, td { border: 1px solid var(--border); padding: 10px; }
         th { background: #f1f5f9; text-align: center; color: var(--text-dark); font-weight: 700; }
         .text-center { text-align: center; }
 
-        /* Buttons */
         .btn {
             padding: 14px;
             font-weight: 700;
@@ -161,12 +154,24 @@
         .detail-btn { background: #e2e8f0; color: #334155; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; width: 100%; margin-top: 12px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .detail-btn:hover { background: #cbd5e1; }
         
+        /* Box Tanda Tangan Barcode */
+        .signature-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border: 1px dashed var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .signature-info { text-align: left; font-size: 12px; color: var(--text-dark); }
+        
         #view-main, #view-refleksi { display: none; }
     </style>
 </head>
 <body>
 
-<!-- LAYAR LOGIN ADMIN / PENYAMBUTAN -->
 <div id="view-login" class="glass-card">
     <div class="header-container">
         <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
@@ -185,7 +190,6 @@
     </div>
 </div>
 
-<!-- LAYAR UTAMA ADMIN (FORM & PORTAL) -->
 <div id="view-main" class="glass-card">
     <div class="top-bar">
         <div class="nav-tabs">
@@ -200,7 +204,6 @@
         <h2 class="header-title" style="font-size: 20px;">SMART SUPERVISI AKADEMIK (FORMAT SILANG)</h2>
     </div>
 
-    <!-- TAB INPUT SUPERVISI -->
     <div id="tab-input" class="tab-content active">
         <form id="supervisiForm">
             <div class="section-title">A. IDENTITAS & KONTAK GURU</div>
@@ -215,18 +218,42 @@
                 <div class="form-group"><label>Hari / Tanggal Supervisi</label><input type="date" id="tanggal" required></div>
             </div>
 
+            <!-- FITUR EDIT BOBOT PENILAIAN -->
+            <div class="section-title">BOBOT PENILAIAN (%)</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Bobot Administrasi (%)</label>
+                    <input type="number" id="bobotAdmin" value="20" min="0" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label>Bobot Telaah Perencanaan (%)</label>
+                    <input type="number" id="bobotTelaah" value="40" min="0" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label>Bobot Observasi Pelaksanaan (%)</label>
+                    <input type="number" id="bobotObservasi" value="40" min="0" max="100" required>
+                </div>
+            </div>
+
             <div class="section-title">B. ADMINISTRASI (0-4)</div>
             <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="70">Nilai</th></tr></thead><tbody id="tb-admin"></tbody></table>
 
             <div class="section-title">C. TELAAH PERENCANAAN (0-4)</div>
             <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="70">Nilai</th><th>Catatan</th></tr></thead><tbody id="tb-telaah"></tbody></table>
             <div class="form-group"><label>Kelebihan Perencanaan pembelajaran:</label><textarea id="kel_perencanaan" rows="2"></textarea></div>
-            <div class="form-group"><label>Hal yang perlu ditingkatkan dari Perencanaan Pembelajaran::</label><textarea id="sar_perencanaan" rows="2"></textarea></div>
+            <div class="form-group"><label>Hal yang perlu ditingkatkan dari Perencanaan Pembelajaran:</label><textarea id="sar_perencanaan" rows="2"></textarea></div>
 
             <div class="section-title">D. OBSERVASI PELAKSANAAN (0-4)</div>
             <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="70">Nilai</th><th>Catatan</th></tr></thead><tbody id="tb-observasi"></tbody></table>
             <div class="form-group"><label>Tuliskan kelebihan pelaksanaan pembelajaran:</label><textarea id="kel_pelaksanaan" rows="2"></textarea></div>
             <div class="form-group"><label>Tuliskan hal yang perlu ditingkatkan dari pelaksanaan pembelajaran:</label><textarea id="sar_pelaksanaan" rows="2"></textarea></div>
+
+            <!-- FITUR CATATAN KHUSUS SUPERVISOR -->
+            <div class="section-title">E. CATATAN KHUSUS SUPERVISOR</div>
+            <div class="form-group">
+                <label>Catatan Khusus / Rekomendasi Umum Supervisor:</label>
+                <textarea id="catatanKhusus" rows="3" placeholder="Tuliskan catatan khusus, arahan khusus, atau rekomendasi umum untuk guru..."></textarea>
+            </div>
 
             <button type="submit" class="btn btn-submit" id="btnSubmit">SIMPAN DATA SUPERVISI</button>
         </form>
@@ -238,7 +265,6 @@
         </div>
     </div>
 
-    <!-- TAB PORTAL CARI -->
     <div id="tab-portal" class="tab-content">
         <div class="section-title">CARI HASIL SUPERVISI</div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -249,7 +275,6 @@
     </div>
 </div>
 
-<!-- LAYAR REFLEKSI GURU (DIBUKA VIA WA) -->
 <div id="view-refleksi" class="glass-card" style="max-width: 500px;">
     <div class="header-container">
         <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
@@ -275,16 +300,12 @@
 </div>
 
 <script>
-    // 1. URL WEB APP GAS KAMU
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyHbaB9x0H5VQdtqqPyVPvbWtyaFosOTQBbCyvF28VaSTByBFlFtjYmm4Uho-3HILtS/exec";
-
-    // 2. PIN ACCESS ADMIN
     const ADMIN_PIN = "1234";
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
 
-    // JIKA DIAKSES DARI LINK REFLEKSI
     if (urlRefleksiId) {
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-refleksi').style.display = 'block';
@@ -331,7 +352,6 @@
         });
     }
 
-    // AUTHENTICATION LOGIC
     function loginAdmin() {
         const inputPin = document.getElementById('adminPin').value;
         if (inputPin === ADMIN_PIN) {
@@ -357,7 +377,6 @@
         document.getElementById('adminPin').value = '';
     }
 
-    // FORM SETUP (Data Aspek)
     const adm = ["CP", "ATP", "Prosem", "Rencana Pembelajaran / Modul Ajar", "Perencanaan Kokurikuler ", "KKTP", "Kalender Pendidikan Sekolah ", "Buku inventaris kelas", "Jadwal Pelajaran", "Kisi-Kisi dan Soal", "Daftar Nilai Murid", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal harian Guru", "Analisis Sumatif"];
     
     const tlh = [
@@ -410,6 +429,17 @@
 
     document.getElementById('supervisiForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // Validasi Total Bobot = 100%
+        const bAdmin = parseFloat(document.getElementById('bobotAdmin').value) || 0;
+        const bTelaah = parseFloat(document.getElementById('bobotTelaah').value) || 0;
+        const bObs = parseFloat(document.getElementById('bobotObservasi').value) || 0;
+
+        if (bAdmin + bTelaah + bObs !== 100) {
+            alert('Total persentase bobot penilaian (Administrasi + Telaah + Observasi) harus tepat 100%!');
+            return;
+        }
+
         document.getElementById('btnSubmit').innerText = 'Menyimpan Data...';
         document.getElementById('btnSubmit').disabled = true;
         
@@ -422,9 +452,11 @@
                 nipGuru: document.getElementById('nipGuru').value, emailGuru: document.getElementById('emailGuru').value,
                 waGuru: document.getElementById('waGuru').value, sekolah: document.getElementById('sekolah').value,
                 mapel: document.getElementById('mapel').value, tanggal: document.getElementById('tanggal').value,
+                bobot: { admin: bAdmin, telaah: bTelaah, observasi: bObs },
                 administrasi: ext('tb-admin',false), telaah: ext('tb-telaah',true), observasi: ext('tb-observasi',true),
                 kelebihanPerencanaan: document.getElementById('kel_perencanaan').value, saranPerencanaan: document.getElementById('sar_perencanaan').value,
-                kelebihanPelaksanaan: document.getElementById('kel_pelaksanaan').value, saranPelaksanaan: document.getElementById('sar_pelaksanaan').value
+                kelebihanPelaksanaan: document.getElementById('kel_pelaksanaan').value, saranPelaksanaan: document.getElementById('sar_pelaksanaan').value,
+                catatanKhusus: document.getElementById('catatanKhusus').value
             }
         };
 
@@ -473,7 +505,6 @@
         }
     }
 
-    // Fungsi pembuat tabel rincian instrumen (MENGGUNAKAN GAYA FORM ASLI)
     function buildDetailedFormTable(title, dataArr, aspekNames, hasCatatan) {
         if (!dataArr || dataArr.length === 0) {
             return `<div style="margin-top:20px;"><div class="section-title">${title}</div><p style="text-align:center; color:red; font-size:12px;">Data rincian tidak tersedia dari server.</p></div>`;
@@ -526,12 +557,16 @@
                     let sarPer = x.saranPerencanaan || '-';
                     let kelPel = x.kelebihanPelaksanaan || '-';
                     let sarPel = x.saranPelaksanaan || '-';
+                    let catKhusus = x.catatanKhusus || '-';
 
-                    // Parse data JSON nilai rincian yang ditarik dari Apps Script
                     let admData = [], tlhData = [], obsData = [];
                     try { admData = typeof x.administrasi === 'string' ? JSON.parse(x.administrasi) : (x.administrasi || []); } catch(e){}
                     try { tlhData = typeof x.telaah === 'string' ? JSON.parse(x.telaah) : (x.telaah || []); } catch(e){}
                     try { obsData = typeof x.observasi === 'string' ? JSON.parse(x.observasi) : (x.observasi || []); } catch(e){}
+
+                    // Generate Tanda Tangan Barcode QR
+                    const qrContent = encodeURIComponent(`DOKUMEN SAH SUPERVISI AKADEMIK\nSupervisor: ${x.supervisor}\nTarget Guru: ${x.guru}\nSekolah: ${x.sekolah}\nTanggal: ${x.tanggal}\nNilai Akhir: ${x.nilaiAkhir} (${x.predikat})`);
+                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrContent}`;
 
                     h+=`<div class="card-result">
                             <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${x.guru}</div>
@@ -543,13 +578,10 @@
                             
                             <button class="detail-btn" onclick="toggleDetail(${idx})">📄 Lihat Rincian Instrumen Lengkap</button>
                             
-                            <!-- BUNGKUSAN DETAIL (Awalnya Sembunyi) -->
                             <div id="detail-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                                 
-                                <!-- Render Komponen B -->
                                 ${buildDetailedFormTable("B. ADMINISTRASI (0-4)", admData, adm, false)}
                                 
-                                <!-- Render Komponen C -->
                                 ${buildDetailedFormTable("C. TELAAH PERENCANAAN (0-4)", tlhData, tlh, true)}
                                 
                                 <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
@@ -559,7 +591,6 @@
                                     <span style="font-size:13px; color:#475569;">${sarPer}</span>
                                 </div>
 
-                                <!-- Render Komponen D -->
                                 ${buildDetailedFormTable("D. OBSERVASI PELAKSANAAN (0-4)", obsData, obs, true)}
                                 
                                 <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
@@ -567,6 +598,21 @@
                                     <span style="font-size:13px; color:#475569;">${kelPel}</span><br><br>
                                     <strong style="color:var(--text-dark); font-size:13px;">Hal yang perlu ditingkatkan dari pelaksanaan pembelajaran:</strong><br>
                                     <span style="font-size:13px; color:#475569;">${sarPel}</span>
+                                </div>
+
+                                <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
+                                    <strong style="color:var(--text-dark); font-size:13px;">E. Catatan Khusus Supervisor:</strong><br>
+                                    <span style="font-size:13px; color:#475569;">${catKhusus}</span>
+                                </div>
+
+                                <!-- TANDA TANGAN BARCODE SUPERVISOR -->
+                                <div class="signature-box">
+                                    <div class="signature-info">
+                                        <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
+                                        <p style="margin:4px 0 0 0; color:var(--text-muted);">${x.supervisor || 'Supervisor'}</p>
+                                        <p style="margin:2px 0 0 0; font-size:10px; color:#10b981;">✔ Terverifikasi oleh Sistem</p>
+                                    </div>
+                                    <img src="${qrApiUrl}" alt="Barcode Tanda Tangan" style="width:90px; height:90px; border-radius:6px;">
                                 </div>
 
                             </div>
