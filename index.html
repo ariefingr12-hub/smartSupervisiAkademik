@@ -66,7 +66,7 @@
         .pin-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
 
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-        .nav-tabs { display: flex; gap: 10px; }
+        .nav-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
         .tab-btn { padding: 10px 18px; cursor: pointer; border: none; background: transparent; font-weight: 700; font-size: 14px; color: var(--text-muted); border-radius: 10px; transition: all 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; }
         .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; }
@@ -128,11 +128,14 @@
     </div>
 </div>
 
-<!-- LAYAR UTAMA (INPUT & PORTAL) -->
+<!-- LAYAR UTAMA -->
 <div id="view-main" class="glass-card">
     <div class="top-bar">
         <div class="nav-tabs">
+            <!-- TAB ADMIN -->
             <button class="tab-btn active" id="btn-tab-input" onclick="switchTab('tab-input', event)">📝 Input Baru</button>
+            <button class="tab-btn" id="btn-tab-admin-edit" onclick="switchTab('tab-admin-edit', event)">🛠️ Kelola Data</button>
+            <!-- TAB PUBLIK -->
             <button class="tab-btn" id="btn-tab-portal" onclick="switchTab('tab-portal', event)">🔍 Cek Hasil</button>
         </div>
         <button class="btn-logout" onclick="logout()">🔒 Keluar</button>
@@ -143,7 +146,7 @@
         <h2 class="header-title" style="font-size: 20px;">SMART SUPERVISI AKADEMIK</h2>
     </div>
 
-    <!-- TAB INPUT SUPERVISI FULL -->
+    <!-- TAB INPUT SUPERVISI FULL (Khusus Admin) -->
     <div id="tab-input" class="tab-content active">
         <form id="supervisiForm">
             <div class="section-title">A. IDENTITAS & KONTAK GURU</div>
@@ -194,18 +197,28 @@
         </div>
     </div>
 
-    <!-- TAB PORTAL CARI -->
-    <div id="tab-portal" class="tab-content">
-        <div class="section-title">CARI HASIL SUPERVISI</div>
+    <!-- TAB KELOLA DATA (Khusus Admin - Ada Tombol Edit) -->
+    <div id="tab-admin-edit" class="tab-content">
+        <div class="section-title">MANAJEMEN & EDIT DATA SUPERVISI</div>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <input type="text" id="searchKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);">
-            <button class="btn btn-primary" style="width:110px;" onclick="doSearch()">Cari</button>
+            <input type="text" id="searchAdminKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);">
+            <button class="btn btn-warning" style="width:110px;" onclick="doSearch('admin')">Cari</button>
         </div>
-        <div id="searchResults"></div>
+        <div id="searchAdminResults"></div>
+    </div>
+
+    <!-- TAB PORTAL CARI (Khusus Publik - Tanpa Tombol Edit) -->
+    <div id="tab-portal" class="tab-content">
+        <div class="section-title">PORTAL PENCARIAN HASIL SUPERVISI</div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="searchPublicKeyword" placeholder="Ketik NIP atau Nama Guru..." style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);">
+            <button class="btn btn-primary" style="width:110px;" onclick="doSearch('public')">Cari</button>
+        </div>
+        <div id="searchPublicResults"></div>
     </div>
 </div>
 
-<!-- LAYAR EDIT DATA (Muncul saat tombol Edit ditekan) -->
+<!-- LAYAR EDIT DATA (Panel Popup K3S) -->
 <div id="view-edit" class="glass-card">
     <div class="top-bar">
         <button class="btn btn-secondary" style="width: auto; margin:0;" onclick="closeEdit()">🔙 Kembali</button>
@@ -260,7 +273,6 @@
     const ADMIN_PIN = "1234";
 
     let currentDataList = [];
-    let isAdminLoggedIn = false; // VARIABEL PENGUNCI AKSES EDIT
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
@@ -305,29 +317,36 @@
 
     function loginAdmin() {
         if (document.getElementById('adminPin').value === ADMIN_PIN) {
-            isAdminLoggedIn = true; // Set Admin True
             document.getElementById('view-login').style.display = 'none';
             document.getElementById('view-main').style.display = 'block';
+            
+            // Tampilkan menu Admin, sembunyikan menu Publik
             document.getElementById('btn-tab-input').style.display = 'block';
+            document.getElementById('btn-tab-admin-edit').style.display = 'block';
+            document.getElementById('btn-tab-portal').style.display = 'none';
             switchTab('tab-input');
         } else { alert('PIN Admin Salah! Silakan coba lagi.'); }
     }
 
     function openPublicPortal() {
-        isAdminLoggedIn = false; // Set Admin False
         document.getElementById('view-login').style.display = 'none';
         document.getElementById('view-main').style.display = 'block';
-        document.getElementById('btn-tab-input').style.display = 'none'; 
+        
+        // Tampilkan menu Publik, sembunyikan menu Admin
+        document.getElementById('btn-tab-input').style.display = 'none';
+        document.getElementById('btn-tab-admin-edit').style.display = 'none';
+        document.getElementById('btn-tab-portal').style.display = 'block';
         switchTab('tab-portal');
     }
 
     function logout() {
-        isAdminLoggedIn = false; // Reset akses saat keluar
         document.getElementById('view-main').style.display = 'none';
         document.getElementById('view-login').style.display = 'block';
         document.getElementById('adminPin').value = '';
-        document.getElementById('searchResults').innerHTML = ''; // Bersihkan pencarian lama
-        document.getElementById('searchKeyword').value = '';
+        document.getElementById('searchAdminResults').innerHTML = ''; 
+        document.getElementById('searchPublicResults').innerHTML = ''; 
+        document.getElementById('searchAdminKeyword').value = '';
+        document.getElementById('searchPublicKeyword').value = '';
     }
 
     const adm = ["CP", "ATP", "Prosem", "Rencana Pembelajaran / Modul Ajar", "Perencanaan Kokurikuler ", "KKTP", "Kalender Pendidikan Sekolah ", "Buku inventaris kelas", "Jadwal Pelajaran", "Kisi-Kisi dan Soal", "Daftar Nilai Murid", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal harian Guru", "Analisis Sumatif"];
@@ -403,8 +422,8 @@
         document.getElementById(id).classList.add('active');
     }
 
-    function toggleDetail(idx) {
-        const detailDiv = document.getElementById('detail-' + idx);
+    function toggleDetail(idx, type) {
+        const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
@@ -426,8 +445,7 @@
         if (!isoString) return '-';
         try {
             const d = new Date(isoString);
-            if (isNaN(d.getTime())) return isoString; // Jika bukan format tanggal valid, kembalikan teks aslinya
-            
+            if (isNaN(d.getTime())) return isoString; 
             const hari = d.getDate().toString().padStart(2, '0');
             const bulan = (d.getMonth() + 1).toString().padStart(2, '0');
             const tahun = d.getFullYear();
@@ -435,15 +453,18 @@
         } catch(e) { return isoString; }
     }
 
-    function doSearch(){
-        const kw=document.getElementById('searchKeyword').value;
+    // FUNGSI PENCARIAN TERPISAH (Satu untuk Admin, Satu untuk Publik)
+    function doSearch(type){
+        const kw = type === 'admin' ? document.getElementById('searchAdminKeyword').value : document.getElementById('searchPublicKeyword').value;
+        const resultContainer = type === 'admin' ? document.getElementById('searchAdminResults') : document.getElementById('searchPublicResults');
+        
         if(!kw) return;
-        document.getElementById('searchResults').innerHTML='<p style="text-align:center; color:#666;">Mencari data...</p>';
+        resultContainer.innerHTML='<p style="text-align:center; color:#666;">Mencari data...</p>';
+        
         fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(kw)}`)
             .then(res => res.json())
             .then(res => {
-                let c=document.getElementById('searchResults');
-                if(!res.data || res.data.length===0){ c.innerHTML='<p style="text-align:center; color:#ef4444;">Data tidak ditemukan.</p>'; return; }
+                if(!res.data || res.data.length===0){ resultContainer.innerHTML='<p style="text-align:center; color:#ef4444;">Data tidak ditemukan.</p>'; return; }
                 
                 currentDataList = res.data; 
                 let h=''; 
@@ -454,14 +475,14 @@
                     try { obsData = typeof x.observasi === 'string' ? JSON.parse(x.observasi) : (x.observasi || []); } catch(e){}
 
                     const tanggalRapi = formatTanggal(x.tanggal);
-
                     const qrContent = encodeURIComponent(`SAH SUPERVISI\nSupervisor: ${x.supervisor}\nGuru: ${x.guru}\nTgl: ${tanggalRapi}\nNilai: ${x.nilaiAkhir}`);
                     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${qrContent}`;
 
-                    // LOGIKA PENYEMBUNYIAN TOMBOL EDIT BERDASARKAN STATUS LOGIN K3S
-                    let editButtonHtml = isAdminLoggedIn 
-                        ? `<button class="btn btn-warning" style="margin:0; width:100px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>` 
-                        : '';
+                    // HANYA RENDER TOMBOL EDIT JIKA TYPE = ADMIN
+                    let actionButtonsHtml = `<button class="detail-btn" style="margin:0;" onclick="toggleDetail(${idx}, '${type}')">📄 Rincian</button>`;
+                    if (type === 'admin') {
+                        actionButtonsHtml += `<button class="btn btn-warning" style="margin:0; width:100px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>`;
+                    }
 
                     h+=`<div class="card-result">
                             <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${x.guru}</div>
@@ -472,11 +493,10 @@
                             </div>
                             
                             <div style="display:flex; gap:10px; margin-top:12px;">
-                                <button class="detail-btn" style="margin:0;" onclick="toggleDetail(${idx})">📄 Rincian</button>
-                                ${editButtonHtml}
+                                ${actionButtonsHtml}
                             </div>
                             
-                            <div id="detail-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto;">
+                            <div id="detail-${type}-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto;">
                                 
                                 ${buildDetailedFormTable("B. ADMINISTRASI (0-4)", admData, adm, false)}
                                 ${buildDetailedFormTable("C. TELAAH PERENCANAAN (0-4)", tlhData, tlh, true)}
@@ -511,11 +531,11 @@
                             </div>
                         </div>`; 
                 }); 
-                c.innerHTML=h;
-            }).catch(() => { document.getElementById('searchResults').innerHTML = '<p style="text-align:center; color:#ef4444;">Gagal terhubung ke server.</p>'; });
+                resultContainer.innerHTML=h;
+            }).catch(() => { resultContainer.innerHTML = '<p style="text-align:center; color:#ef4444;">Gagal terhubung ke server.</p>'; });
     }
 
-    // FUNGSI MEMBUKA FORM EDIT
+    // FUNGSI MEMBUKA FORM EDIT (Hanya Dipanggil dari Tab Admin)
     function openEdit(idx) {
         const data = currentDataList[idx];
         document.getElementById('view-main').style.display = 'none';
@@ -579,7 +599,7 @@
             if(res.status === 'success') {
                 alert('Data berhasil diperbarui!');
                 closeEdit();
-                doSearch(); 
+                doSearch('admin'); 
             } else alert('Gagal update: ' + res.message);
         }).finally(() => { document.getElementById('btnUpdate').innerText = 'SIMPAN PERUBAHAN DATA'; });
     });
