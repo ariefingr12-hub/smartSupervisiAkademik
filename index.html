@@ -127,7 +127,6 @@
             .section-title { background: #e2e8f0 !important; color: black !important; border: 1px solid #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; page-break-after: avoid; }
             .signature-box { border: 1px solid #000 !important; page-break-inside: avoid; }
             
-            /* Sembunyikan elemen scroll & UI pada saat cetak */
             div[id^="detail-"] { max-height: none !important; overflow: visible !important; border: none !important; padding: 0 !important; background: transparent !important; }
         }
     </style>
@@ -269,7 +268,6 @@
 
 <!-- LAYAR REFLEKSI GURU -->
 <div id="view-refleksi" class="glass-card" style="max-width: 500px;">
-    <!-- Bagian Refleksi Tetap Sama -->
     <div class="header-container">
         <img src="logo.jpg" alt="Logo Supervisi" class="logo" onerror="this.style.display='none'">
         <h2 class="header-title">Form Refleksi Guru</h2>
@@ -457,20 +455,20 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
-    // FUNGSI UNTUK CETAK PDF
+    // FUNGSI UNTUK CETAK PDF (NAMA SEKOLAH DI HILANGKAN DARI KOP)
     function cetakPDF(idx, type) {
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
-        // Buat layout khusus cetak
+        // Buat layout khusus cetak dengan KOP yang netral untuk program silang
         const printHtml = `
             <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
                 <h2 style="margin: 0;">LAPORAN HASIL SUPERVISI AKADEMIK</h2>
-                <h3 style="margin: 5px 0 0 0; color: #333;">${data.sekolah}</h3>
             </div>
             
             <table style="width:100%; margin-bottom:20px; border:none;">
-                <tr><td style="border:none; padding:4px; width:150px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${data.guru}</td></tr>
+                <tr><td style="border:none; padding:4px; width:150px;"><b>Sekolah Tujuan</b></td><td style="border:none; padding:4px;">: ${data.sekolah}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${data.guru}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>NIP</b></td><td style="border:none; padding:4px;">: ${data.nipGuru || '-'}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Mata Pelajaran</b></td><td style="border:none; padding:4px;">: ${data.mapel}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Tanggal Supervisi</b></td><td style="border:none; padding:4px;">: ${formatTanggal(data.tanggal)}</td></tr>
@@ -539,7 +537,6 @@
                     const tanggalRapi = formatTanggal(x.tanggal);
                     const vercelBaseUrl = window.location.origin + window.location.pathname;
                     
-                    // TOMBOL LIHAT RINCIAN & CETAK PDF
                     let actionButtonsHtml = `
                         <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
                         <button class="btn btn-primary" style="padding:10px 14px; font-size:12px;" onclick="cetakPDF(${idx}, '${type}')">🖨️ Cetak / Simpan PDF</button>
