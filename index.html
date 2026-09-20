@@ -9,8 +9,9 @@
         :root {
             --primary: #3b82f6;
             --primary-dark: #1d4ed8;
-            --public: #8b5cf6; 
-            --public-dark: #6d28d9;
+            /* Warna ungu sudah diubah jadi BIRU di bawah ini */
+            --public: #3b82f6; 
+            --public-dark: #1d4ed8;
             --accent: #10b981;
             --accent-hover: #059669;
             --dark-bg: #0f172a;
@@ -117,14 +118,11 @@
 <body>
 
 <script>
-    // ==========================================
-    // LOGIK CEGATAN: HALAMAN SCAN TANDA TANGAN
-    // ==========================================
+    // Logika Cegatan Scan tetap ada kalau suatu saat dibutuhkan
     const urlParams = new URLSearchParams(window.location.search);
     const urlScanTtd = urlParams.get('scanTtd');
 
     if (urlScanTtd) {
-        // Jika link dari barcode dibuka, halaman akan berubah murni jadi tampilan Tanda Tangan
         const spvName = urlParams.get('spv') || 'Supervisor';
         const guruName = urlParams.get('guru') || 'Guru';
         const tglScan = urlParams.get('tgl') || '-';
@@ -138,20 +136,13 @@
                 <p style="color: #64748b; font-size: 14px; margin-bottom: 25px; line-height: 1.5;">
                     Dokumen Hasil Supervisi Akademik atas nama <b>${guruName}</b> (${tglScan}) dinyatakan sah.
                 </p>
-                
-                <!-- INI GAMBAR TANDA TANGAN ASLINYA -->
                 <img src="gambar tandatangan_2.jpeg" alt="Tanda Tangan Fisik Supervisor" style="width: 100%; max-width: 250px; mix-blend-mode: multiply; margin-bottom: 5px;">
-                
                 <h3 style="margin: 0; color: #0f172a; font-size: 16px;">${spvName}</h3>
                 <p style="margin: 2px 0 20px 0; color: #64748b; font-size: 12px;">Kepala Sekolah / Supervisor</p>
-
                 <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
-                <p style="color: #10b981; font-weight: bold; font-size: 13px; margin: 0;">
-                    ✔ Terverifikasi SMART SUPERVISI
-                </p>
+                <p style="color: #10b981; font-weight: bold; font-size: 13px; margin: 0;">✔ Terverifikasi SMART SUPERVISI</p>
             </div>
         `;
-        // Hentikan proses web app agar hanya menampilkan halaman tanda tangan ini
         throw new Error("Menampilkan Halaman Scan Barcode Tanda Tangan"); 
     }
 </script>
@@ -406,7 +397,7 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // DATA ASPEK (Disingkat untuk fokus ke logika)
+    // DATA ASPEK
     const adm = ["CP", "ATP", "Prosem", "Rencana Pembelajaran / Modul Ajar", "Perencanaan Kokurikuler ", "KKTP", "Kalender Pendidikan Sekolah ", "Buku inventaris kelas", "Jadwal Pelajaran", "Kisi-Kisi dan Soal", "Daftar Nilai Murid", "Asesmen Formatif", "Asesmen Kokurikuler", "Presensi", "Jurnal harian Guru", "Analisis Sumatif"];
     const tlh = ["Tujuan, kegiatan, dan asesmen saling mendukung.", "Tujuan pembelajaran mengarah pada Dimensi Profil Lulusan.", "Kegiatan yang direncanakan sesuai dengan cara/model pembelajaran yang dipilih.", "Lingkungan belajar yang direncanakan mendukung murid belajar.", "Kerja sama/interaksi murid direncanakan. Ada kegiatan berpasangan/kelompok atau bentuk kemitraan lain", "Pemanfaatan digital yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran", "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEMAHAMI", "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MENGAPLIKASI", "Langkah pembelajaran dapat memfasilitasi murid untuk merasakan pengalaman belajar MEREFLEKSI", "Bahasa, sikap, dan kegiatan menunjukkan saling menghormati dan memuliakan", "Prinsip pembelajaran mendalam berupa berkesadaran, bermakna, dan/atau menggembirakan sudah tergambar", "Perencanaan pembelajaran sudah mengakomodir pengalaman belajar", "Ada cara mengetahui pengetahuan awal, kesiapan, atau kebutuhan belajar murid", "Ada cara memantau proses, memberi umpan balik, dan memperbaiki pembelajaran. (asesmen formatif)", "Asesmen akhir sesuai dengan tujuan pembelajaran"];
     const obs = ["Kegiatan awal, inti, dan penutup sesuai/menyesuaikan rencana secara wajar", "Murid mengetahui apa yang dipelajari/dikerjakan; kegiatan mengarah ke tujuan.", "Murid bertanya, menjawab, berdiskusi, mencoba, mengerjakan, atau berpikir; guru tidak dominan ceramah.", "Ruang kelas rapi, aman, dan posisi duduk mendukung interaksi belajar", "Murid saling mendengarkan, berbagi tugas, membantu, dan bekerja sama.", "Media/alat peraga/aplikasi benar-benar dipakai oleh guru/murid", "Guru menyapa murid dengan ramah, adil memanggil murid", "Guru mengaitkan materi dengan pengetahuan sebelumnya", "Murid mencoba, mempraktikkan, berdiskusi, menggunakan konsep", "Murid menyimpulkan, menyampaikan yang sudah/belum dipahami", "Pembelajaran terasa berkesadaran, bermakna, dan/atau menggembirakan", "Guru menyesuaikan penjelasan, tugas, bantuan, pengelompokan", "Guru mengecek kesiapan, pengetahuan awal, atau kebutuhan murid", "Guru memantau saat murid bekerja, memberikan pujian/koreksi", "Ada bukti pencapaian tujuan/kompetensi melalui tes, praktik, proyek"];
@@ -508,7 +499,7 @@
         } catch(e) { return isoString; }
     }
 
-    // FUNGSI PENCARIAN (Penting: QR Code Scanner Generate disini)
+    // FUNGSI PENCARIAN & LOAD GAMBAR BARCODE STATIS
     function doSearch(type){
         const kw = type === 'admin' ? document.getElementById('searchAdminKeyword').value : document.getElementById('searchPublicKeyword').value;
         const resultContainer = type === 'admin' ? document.getElementById('searchAdminResults') : document.getElementById('searchPublicResults');
@@ -532,13 +523,6 @@
                     const tanggalRapi = formatTanggal(x.tanggal);
                     const vercelBaseUrl = window.location.origin + window.location.pathname;
                     
-                    // =========================================================================
-                    // INILAH RAHASIANYA! Barcode sekarang diarahkan ke link aplikasinya sendiri
-                    // Tapi ditambahkan parameter `scanTtd=1` agar halamannya berubah
-                    // =========================================================================
-                    const urlBarcodeScan = `${vercelBaseUrl}?scanTtd=1&spv=${encodeURIComponent(x.supervisor)}&guru=${encodeURIComponent(x.guru)}&tgl=${encodeURIComponent(tanggalRapi)}`;
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlBarcodeScan)}`;
-
                     let actionButtonsHtml = `<button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>`;
                     
                     if (type === 'admin') {
@@ -578,14 +562,16 @@
                                     <span style="font-size:13px; color:#475569;">${x.catatanKhusus || '-'}</span>
                                 </div>
 
-                                <!-- KOTAK TANDA TANGAN (BERISI BARCODE) -->
+                                <!-- KOTAK TANDA TANGAN (GAMBAR BARCODE STATIS) -->
                                 <div class="signature-box" style="margin-top:25px;">
-                                    <img src="${qrApiUrl}" alt="Barcode Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;">
+                                    <!-- FILE GAMBAR BARCODE STATIS DIPANGGIL DI SINI -->
+                                    <img src="tandatanganbarcode.jpg" alt="Barcode Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;" onerror="this.style.display='none'">
+                                    
                                     <div class="signature-info">
                                         <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
                                         <p style="margin:4px 0 0 0; color:var(--text-muted);">${x.supervisor}</p>
                                         <p style="margin:4px 0 0 0; font-size:11px; color:#10b981;">
-                                            <b>Coba Scan Barcode di samping!</b> Nanti otomatis muncul TTD Aslinya di layar HP.
+                                            <b>✔ Tanda tangan digital disematkan</b>
                                         </p>
                                     </div>
                                 </div>
