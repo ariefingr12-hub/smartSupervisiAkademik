@@ -469,19 +469,23 @@
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
+        // Penyesuaian nama variabel dari Google Apps Script
+        const nipFix = data.nipGuru || data.nip || data.NIP || '-';
+        const spvFix = data.supervisor || data.namaSupervisor || data.nama_supervisor || '-';
+        
         const printHtml = `
             <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
                 <h2 style="margin: 0;">LAPORAN HASIL SUPERVISI AKADEMIK</h2>
             </div>
             
             <table style="width:100%; margin-bottom:20px; border:none;">
-                <tr><td style="border:none; padding:4px; width:150px;"><b>Sekolah Tujuan</b></td><td style="border:none; padding:4px;">: ${data.sekolah}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${data.guru}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>NIP</b></td><td style="border:none; padding:4px;">: ${data.nipGuru || '-'}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>Mata Pelajaran</b></td><td style="border:none; padding:4px;">: ${data.mapel}</td></tr>
+                <tr><td style="border:none; padding:4px; width:150px;"><b>Sekolah Tujuan</b></td><td style="border:none; padding:4px;">: ${data.sekolah || '-'}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${data.guru || '-'}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>NIP</b></td><td style="border:none; padding:4px;">: ${nipFix}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Mata Pelajaran</b></td><td style="border:none; padding:4px;">: ${data.mapel || '-'}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Tanggal Supervisi</b></td><td style="border:none; padding:4px;">: ${formatTanggal(data.tanggal)}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>Nama Supervisor</b></td><td style="border:none; padding:4px;">: ${data.supervisor}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>Nilai Akhir</b></td><td style="border:none; padding:4px; font-size:16px;">: <b>${data.nilaiAkhir} (${data.predikat})</b></td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nama Supervisor</b></td><td style="border:none; padding:4px;">: ${spvFix}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nilai Akhir</b></td><td style="border:none; padding:4px; font-size:16px;">: <b>${data.nilaiAkhir || '-'} (${data.predikat || '-'})</b></td></tr>
             </table>
             ${detailDiv.innerHTML}
         `;
@@ -540,6 +544,7 @@
 
                     const tanggalRapi = formatTanggal(x.tanggal);
                     const vercelBaseUrl = window.location.origin + window.location.pathname;
+                    const spvFix = x.supervisor || x.namaSupervisor || x.nama_supervisor || '-';
                     
                     let actionButtonsHtml = `
                         <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
@@ -551,7 +556,7 @@
                         if(cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
                         
                         const linkRefleksi = `${vercelBaseUrl}?refleksi=${x.idTx || ''}`;
-                        const msgWA = `Yth. Bapak/Ibu ${x.guru},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${x.nilaiAkhir} (${x.predikat})\n- Supervisor: ${x.supervisor}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
+                        const msgWA = `Yth. Bapak/Ibu ${x.guru},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${x.nilaiAkhir} (${x.predikat})\n- Supervisor: ${spvFix}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
                         const waUrl = `https://api.whatsapp.com/send?phone=${cleanWa}&text=${encodeURIComponent(msgWA)}`;
 
                         actionButtonsHtml += `
@@ -587,7 +592,7 @@
                                     <img src="${qrCodeImageSrc}" alt="QR Code Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;">
                                     <div class="signature-info">
                                         <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
-                                        <p style="margin:4px 0 0 0; color:var(--text-muted);">${x.supervisor}</p>
+                                        <p style="margin:4px 0 0 0; color:var(--text-muted);">${spvFix}</p>
                                         <p style="margin:4px 0 0 0; font-size:11px; color:#10b981;">
                                             <b>✔ Tanda tangan digital disematkan (Scan QR)</b>
                                         </p>
