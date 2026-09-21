@@ -253,6 +253,18 @@
         <input type="hidden" id="edit-idTx"> 
         <div class="section-title" id="edit-header-info">Mengedit Data: -</div>
         
+        <div class="section-title">A. REVISI IDENTITAS & KONTAK</div>
+        <div class="form-grid">
+            <div class="form-group"><label>Nama Supervisor</label><input type="text" id="edit-supervisor" required></div>
+            <div class="form-group"><label>Nama Pendidik</label><input type="text" id="edit-guru" required></div>
+            <div class="form-group"><label>NIP / ID Guru</label><input type="text" id="edit-nip"></div>
+            <div class="form-group"><label>Email Guru</label><input type="email" id="edit-email"></div>
+            <div class="form-group"><label>No. WhatsApp Guru</label><input type="text" id="edit-wa" required></div>
+            <div class="form-group"><label>Nama Sekolah Target</label><input type="text" id="edit-sekolah" required></div>
+            <div class="form-group"><label>Mata Pelajaran</label><input type="text" id="edit-mapel" required></div>
+            <div class="form-group"><label>Tanggal Supervisi</label><input type="date" id="edit-tanggal" required></div>
+        </div>
+
         <div class="section-title">B. REVISI ADMINISTRASI (0-4)</div>
         <table><thead><tr><th width="30">No</th><th>Aspek</th><th width="70">Nilai</th></tr></thead><tbody id="edit-tb-admin"></tbody></table>
 
@@ -294,7 +306,6 @@
 <div id="print-area"></div>
 
 <script>
-    // PASTIKAN URL INI ADALAH URL DEPLOYMENT BARU (NEW DEPLOYMENT) YANG DIAKSES OLEH "SIAPA SAJA"
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyHbaB9x0H5VQdtqqPyVPvbWtyaFosOTQBbCyvF28VaSTByBFlFtjYmm4Uho-3HILtS/exec";
     const ADMIN_PIN = "1234";
 
@@ -303,7 +314,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
 
-    // KONFIGURASI FETCH POST STANDAR GAS UNTUK MENCEGAH CORS ERROR
     const fetchPostConfig = (payload) => ({
         method: 'POST',
         redirect: 'follow',
@@ -465,7 +475,6 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
-    // FUNGSI BARU: Pelacak nama variabel anti-gagal
     function bacaFleksibel(obj, kataKunci) {
         const kunci = Object.keys(obj).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === kataKunci);
         return kunci && obj[kunci] && obj[kunci] !== "" ? obj[kunci] : null;
@@ -475,7 +484,6 @@
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
-        // Membaca NIP & Supervisor secara dinamis meskipun ada spasi/huruf besar di database
         const nipFix = bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '-';
         const spvFix = bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namak3s') || '-';
         
@@ -567,7 +575,7 @@
 
                         actionButtonsHtml += `
                             <a href="${waUrl}" target="_blank" class="btn btn-wa" style="padding:10px 14px; font-size:12px;">📱 Kirim WA Report</a>
-                            <button class="btn btn-warning" style="padding:10px 14px; font-size:12px;" onclick="openEdit(${idx})">✏️ Edit Nilai</button>
+                            <button class="btn btn-warning" style="padding:10px 14px; font-size:12px;" onclick="openEdit(${idx})">✏️ Edit Data</button>
                         `;
                     }
 
@@ -619,6 +627,29 @@
         document.getElementById('edit-idTx').value = data.idTx || ""; 
         document.getElementById('edit-header-info').innerText = `Mengedit Data: ${data.guru} (${formatTanggal(data.tanggal)})`;
 
+        // Load identitas untuk diedit
+        const nipFix = bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '';
+        const spvFix = bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namak3s') || '';
+        
+        document.getElementById('edit-supervisor').value = spvFix;
+        document.getElementById('edit-guru').value = data.guru || "";
+        document.getElementById('edit-nip').value = nipFix;
+        document.getElementById('edit-email').value = data.emailGuru || data.email || "";
+        document.getElementById('edit-wa').value = data.waGuru || data.wa || "";
+        document.getElementById('edit-sekolah').value = data.sekolah || "";
+        document.getElementById('edit-mapel').value = data.mapel || "";
+        
+        // Format tanggal agar masuk ke input type="date"
+        let tglStr = "";
+        if (data.tanggal) {
+            try {
+                let d = new Date(data.tanggal);
+                if (!isNaN(d.getTime())) tglStr = d.toISOString().split('T')[0];
+            } catch(e) {}
+        }
+        document.getElementById('edit-tanggal').value = tglStr;
+
+        // Load nilai tabel
         let admData = []; let tlhData = []; let obsData = [];
         try { admData = typeof data.administrasi === 'string' ? JSON.parse(data.administrasi) : (data.administrasi || []); } catch(e){}
         try { tlhData = typeof data.telaah === 'string' ? JSON.parse(data.telaah) : (data.telaah || []); } catch(e){}
@@ -658,9 +689,18 @@
 
         document.getElementById('btnUpdate').innerText = 'Memperbarui Data...';
         
+        // Payload sekarang mengirim data identitas juga
         const payload = {
             action: 'updateData',
             idTx: idTx,
+            supervisor: document.getElementById('edit-supervisor').value,
+            guru: document.getElementById('edit-guru').value,
+            nipGuru: document.getElementById('edit-nip').value,
+            emailGuru: document.getElementById('edit-email').value,
+            waGuru: document.getElementById('edit-wa').value,
+            sekolah: document.getElementById('edit-sekolah').value,
+            mapel: document.getElementById('edit-mapel').value,
+            tanggal: document.getElementById('edit-tanggal').value,
             administrasi: extEdit('edit-tb-admin', false),
             telaah: extEdit('edit-tb-telaah', true),
             observasi: extEdit('edit-tb-observasi', true)
