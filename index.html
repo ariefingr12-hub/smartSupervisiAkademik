@@ -114,7 +114,6 @@
         #view-main, #view-refleksi, #view-edit { display: none; }
         #print-area { display: none; }
 
-        /* PENGATURAN KHUSUS UNTUK CETAK PDF */
         @media print {
             body { background: white !important; margin: 0; padding: 0; color: black !important; }
             #view-login, #view-main, #view-edit, #view-refleksi { display: none !important; }
@@ -466,7 +465,7 @@
         }).catch((err) => {
             document.getElementById('btnSubmit').innerText = 'SIMPAN DATA SUPERVISI';
             document.getElementById('btnSubmit').disabled = false;
-            alert('Gagal terhubung ke server. Pastikan Akses Deploy diatur ke "Siapa saja". Error detail: ' + err.message);
+            alert('Gagal terhubung ke server. Error detail: ' + err.message);
         });
     });
 
@@ -475,17 +474,39 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
-    // Fungsi carian kunci pintar yang dipertingkatkan
+    // Fungsi carian tingkat tinggi untuk mengekstrak data dari objek Google Sheets
     function dapatkanNilai(obj, ...daftarKunci) {
-        if (!obj) return '';
+        if (!obj || typeof obj !== 'object') return '';
+        
+        // 1. Cek langsung kunci yang persis
+        for (let target of daftarKunci) {
+            if (obj[target] !== undefined && obj[target] !== null && obj[target] !== "") return obj[target];
+        }
+
         const keys = Object.keys(obj);
+
+        // 2. Cek persis tanpa memperhitungkan spasi/karakter khusus
         for (let target of daftarKunci) {
             const targetClean = target.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const foundKey = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '').includes(targetClean));
+            const foundKey = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === targetClean);
             if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== null && obj[foundKey] !== "") {
                 return obj[foundKey];
             }
         }
+
+        // 3. Cek sebagian teks (substring)
+        for (let target of daftarKunci) {
+            const targetClean = target.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (targetClean.length < 2) continue;
+            const foundKey = keys.find(k => {
+                const kClean = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return kClean.includes(targetClean) && kClean.length >= 2;
+            });
+            if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== null && obj[foundKey] !== "") {
+                return obj[foundKey];
+            }
+        }
+
         return '';
     }
 
@@ -575,9 +596,21 @@
                     const spvFix = dapatkanNilai(x, 'supervisor', 'k3s', 'namasupervisor') || '-';
                     const sekolahFix = dapatkanNilai(x, 'sekolah', 'namasekolah') || '-';
                     const mapelFix = dapatkanNilai(x, 'mapel', 'matapelajaran') || '-';
-                    const idTxFix = dapatkanNilai(x, 'idtx', 'idtransaksi', 'id');
                     const waFix = dapatkanNilai(x, 'waguru', 'wa', 'whatsapp', 'nohp') || '';
-                    
+
+                    // Ekstraksi ID Transaksi otomatis dengan Fallback
+                    let idTxFix = dapatkanNilai(x, 'idTx', 'idtx', 'idtransaksi', 'id_tx', 'id_transaksi', 'idTransaksi', 'ID Transaksi', 'ID_TRANSAKSI', 'ID TX', 'ID', 'id', 'no', 'kode');
+                    if (!idTxFix && x) {
+                        for (let k in x) {
+                            let kLower = k.toLowerCase();
+                            if ((kLower.includes('id') || kLower.includes('tx') || kLower.includes('transaksi')) && x[k]) {
+                                idTxFix = x[k];
+                                break;
+                            }
+                        }
+                    }
+                    if (!idTxFix && x) { const firstKey = Object.keys(x)[0]; if (firstKey && x[firstKey]) idTxFix = x[firstKey]; }
+
                     let actionButtonsHtml = `
                         <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
                         <button class="btn btn-primary" style="padding:10px 14px; font-size:12px;" onclick="cetakPDF(${idx}, '${type}')">🖨️ Cetak / Simpan PDF</button>
@@ -642,7 +675,24 @@
         document.getElementById('view-main').style.display = 'none';
         document.getElementById('view-edit').style.display = 'block';
         
-        const idTxFix = dapatkanNilai(data, 'idtx', 'idtransaksi', 'id');
+        // Deteksi ID Transaksi menggunakan fallback multi-tingkat
+        let idTxFix = dapatkanNilai(data, 'idTx', 'idtx', 'idtransaksi', 'id_tx', 'id_transaksi', 'idTransaksi', 'ID Transaksi', 'ID_TRANSAKSI', 'ID TX', 'ID', 'id', 'no', 'kode');
+
+        if (!idTxFix && data) {
+            for (let k in data) {
+                let kLower = k.toLowerCase();
+                if ((kLower.includes('id') || kLower.includes('tx') || kLower.includes('transaksi')) && data[k]) {
+                    idTxFix = data[k];
+                    break;
+                }
+            }
+        }
+
+        if (!idTxFix && data) {
+            const firstKey = Object.keys(data)[0];
+            if (firstKey && data[firstKey]) idTxFix = data[firstKey];
+        }
+
         document.getElementById('edit-idTx').value = idTxFix; 
         
         const guruFix = dapatkanNilai(data, 'guru', 'namaguru', 'pendidik');
@@ -707,7 +757,7 @@
     document.getElementById('editForm').addEventListener('submit', function(e) {
         e.preventDefault();
         let idTx = document.getElementById('edit-idTx').value;
-        if (!idTx) { alert("ID Transaksi tidak ditemukan!"); return; }
+        if (!idTx) { alert("ID Transaksi tidak ditemukan! Pastikan data pada Google Sheets memiliki ID."); return; }
 
         document.getElementById('btnUpdate').innerText = 'Memperbarui Data...';
         
