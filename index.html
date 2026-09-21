@@ -294,13 +294,22 @@
 <div id="print-area"></div>
 
 <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzTg0DV1-9eh1kTnvGWSNKRDYTVy5c5jvmghq4_SsVgpXloo4IDDu8TwJSlK8t7MFCTmg/exec";
+    // PASTIKAN URL INI ADALAH URL DEPLOYMENT BARU (NEW DEPLOYMENT) YANG DIAKSES OLEH "SIAPA SAJA"
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyHbaB9x0H5VQdtqqPyVPvbWtyaFosOTQBbCyvF28VaSTByBFlFtjYmm4Uho-3HILtS/exec";
     const ADMIN_PIN = "1234";
 
     let currentDataList = [];
     
     const urlParams = new URLSearchParams(window.location.search);
     const urlRefleksiId = urlParams.get('refleksi');
+
+    // KONFIGURASI FETCH POST STANDAR GAS UNTUK MENCEGAH CORS ERROR
+    const fetchPostConfig = (payload) => ({
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+    });
 
     if (urlRefleksiId) {
         document.getElementById('view-login').style.display = 'none';
@@ -322,10 +331,7 @@
             document.getElementById('btnKirimRefleksi').innerText = 'Mengirim...';
             document.getElementById('btnKirimRefleksi').disabled = true;
 
-            fetch(GAS_API_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'simpanRefleksi', idTx: urlRefleksiId, refleksi: document.getElementById('val-refleksi').value, rtl: document.getElementById('val-rtl').value })
-            })
+            fetch(GAS_API_URL, fetchPostConfig({ action: 'simpanRefleksi', idTx: urlRefleksiId, refleksi: document.getElementById('val-refleksi').value, rtl: document.getElementById('val-rtl').value }))
             .then(res => res.json())
             .then(res => {
                 if (res.status === 'success') {
@@ -336,6 +342,10 @@
                     document.getElementById('btnKirimRefleksi').innerText = 'KIRIM REFLEKSI';
                     document.getElementById('btnKirimRefleksi').disabled = false;
                 }
+            }).catch((err) => {
+                alert('Gagal terhubung ke server. Detail: ' + err.message);
+                document.getElementById('btnKirimRefleksi').innerText = 'KIRIM REFLEKSI';
+                document.getElementById('btnKirimRefleksi').disabled = false;
             });
         });
     }
@@ -423,7 +433,7 @@
             }
         };
 
-        fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(pay) })
+        fetch(GAS_API_URL, fetchPostConfig(pay))
         .then(res => res.json())
         .then(res => {
             document.getElementById('btnSubmit').innerText = 'SIMPAN DATA SUPERVISI';
@@ -443,10 +453,10 @@
                 document.getElementById('btnWaDirect').href = finalWaUrl; 
                 document.getElementById('supervisiForm').reset();
             } else alert('Error: '+res.message);
-        }).catch(() => {
+        }).catch((err) => {
             document.getElementById('btnSubmit').innerText = 'SIMPAN DATA SUPERVISI';
             document.getElementById('btnSubmit').disabled = false;
-            alert('Gagal terhubung ke server.');
+            alert('Gagal terhubung ke server. Pastikan Akses Deploy diatur ke "Siapa saja". Error detail: ' + err.message);
         });
     });
 
@@ -455,12 +465,10 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
-    // FUNGSI UNTUK CETAK PDF (NAMA SEKOLAH DI HILANGKAN DARI KOP)
     function cetakPDF(idx, type) {
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
-        // Buat layout khusus cetak dengan KOP yang netral untuk program silang
         const printHtml = `
             <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
                 <h2 style="margin: 0;">LAPORAN HASIL SUPERVISI AKADEMIK</h2>
@@ -475,12 +483,8 @@
                 <tr><td style="border:none; padding:4px;"><b>Nama Supervisor</b></td><td style="border:none; padding:4px;">: ${data.supervisor}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Nilai Akhir</b></td><td style="border:none; padding:4px; font-size:16px;">: <b>${data.nilaiAkhir} (${data.predikat})</b></td></tr>
             </table>
-
-            <!-- Ambil isi rincian aspek -->
             ${detailDiv.innerHTML}
         `;
-        
-        // Masukkan ke area print lalu panggil print dialog
         document.getElementById('print-area').innerHTML = printHtml;
         window.print();
     }
@@ -589,7 +593,6 @@
                                         </p>
                                     </div>
                                 </div>
-
                             </div>
                         </div>`; 
                 }); 
@@ -652,7 +655,7 @@
             observasi: extEdit('edit-tb-observasi', true)
         };
 
-        fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(payload) })
+        fetch(GAS_API_URL, fetchPostConfig(payload))
         .then(res => res.json())
         .then(res => {
             if(res.status === 'success') {
@@ -660,6 +663,8 @@
                 closeEdit();
                 doSearch('admin'); 
             } else alert('Gagal update: ' + res.message);
+        }).catch((err) => {
+            alert('Gagal update data. Detail: ' + err.message);
         }).finally(() => { document.getElementById('btnUpdate').innerText = 'SIMPAN PERUBAHAN DATA'; });
     });
 </script>
