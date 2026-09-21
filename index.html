@@ -475,17 +475,29 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
-    function bacaFleksibel(obj, kataKunci) {
-        const kunci = Object.keys(obj).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === kataKunci);
-        return kunci && obj[kunci] && obj[kunci] !== "" ? obj[kunci] : null;
+    // Fungsi carian kunci pintar yang dipertingkatkan
+    function dapatkanNilai(obj, ...daftarKunci) {
+        if (!obj) return '';
+        const keys = Object.keys(obj);
+        for (let target of daftarKunci) {
+            const targetClean = target.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const foundKey = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '').includes(targetClean));
+            if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== null && obj[foundKey] !== "") {
+                return obj[foundKey];
+            }
+        }
+        return '';
     }
 
     function cetakPDF(idx, type) {
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
-        const nipFix = bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '-';
-        const spvFix = bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namak3s') || '-';
+        const guruFix = dapatkanNilai(data, 'guru', 'namaguru', 'pendidik') || '-';
+        const nipFix = dapatkanNilai(data, 'nipguru', 'nip', 'idguru') || '-';
+        const spvFix = dapatkanNilai(data, 'supervisor', 'k3s', 'namasupervisor') || '-';
+        const sekolahFix = dapatkanNilai(data, 'sekolah', 'namasekolah') || '-';
+        const mapelFix = dapatkanNilai(data, 'mapel', 'matapelajaran') || '-';
         
         const printHtml = `
             <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
@@ -493,10 +505,10 @@
             </div>
             
             <table style="width:100%; margin-bottom:20px; border:none;">
-                <tr><td style="border:none; padding:4px; width:150px;"><b>Sekolah Tujuan</b></td><td style="border:none; padding:4px;">: ${data.sekolah || '-'}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${data.guru || '-'}</td></tr>
+                <tr><td style="border:none; padding:4px; width:150px;"><b>Sekolah Tujuan</b></td><td style="border:none; padding:4px;">: ${sekolahFix}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Nama Guru</b></td><td style="border:none; padding:4px;">: ${guruFix}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>NIP</b></td><td style="border:none; padding:4px;">: ${nipFix}</td></tr>
-                <tr><td style="border:none; padding:4px;"><b>Mata Pelajaran</b></td><td style="border:none; padding:4px;">: ${data.mapel || '-'}</td></tr>
+                <tr><td style="border:none; padding:4px;"><b>Mata Pelajaran</b></td><td style="border:none; padding:4px;">: ${mapelFix}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Tanggal Supervisi</b></td><td style="border:none; padding:4px;">: ${formatTanggal(data.tanggal)}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Nama Supervisor</b></td><td style="border:none; padding:4px;">: ${spvFix}</td></tr>
                 <tr><td style="border:none; padding:4px;"><b>Nilai Akhir</b></td><td style="border:none; padding:4px; font-size:16px;">: <b>${data.nilaiAkhir || '-'} (${data.predikat || '-'})</b></td></tr>
@@ -558,7 +570,13 @@
 
                     const tanggalRapi = formatTanggal(x.tanggal);
                     const vercelBaseUrl = window.location.origin + window.location.pathname;
-                    const spvFix = bacaFleksibel(x, 'namasupervisor') || bacaFleksibel(x, 'supervisor') || bacaFleksibel(x, 'namak3s') || '-';
+                    
+                    const guruFix = dapatkanNilai(x, 'guru', 'namaguru', 'pendidik') || '-';
+                    const spvFix = dapatkanNilai(x, 'supervisor', 'k3s', 'namasupervisor') || '-';
+                    const sekolahFix = dapatkanNilai(x, 'sekolah', 'namasekolah') || '-';
+                    const mapelFix = dapatkanNilai(x, 'mapel', 'matapelajaran') || '-';
+                    const idTxFix = dapatkanNilai(x, 'idtx', 'idtransaksi', 'id');
+                    const waFix = dapatkanNilai(x, 'waguru', 'wa', 'whatsapp', 'nohp') || '';
                     
                     let actionButtonsHtml = `
                         <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
@@ -566,11 +584,11 @@
                     `;
                     
                     if (type === 'admin') {
-                        let cleanWa = (x.waGuru || '').replace(/[^0-9]/g, '');
+                        let cleanWa = waFix.replace(/[^0-9]/g, '');
                         if(cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
                         
-                        const linkRefleksi = `${vercelBaseUrl}?refleksi=${x.idTx || ''}`;
-                        const msgWA = `Yth. Bapak/Ibu ${x.guru},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${x.nilaiAkhir} (${x.predikat})\n- Supervisor: ${spvFix}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
+                        const linkRefleksi = `${vercelBaseUrl}?refleksi=${idTxFix || ''}`;
+                        const msgWA = `Yth. Bapak/Ibu ${guruFix},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${x.nilaiAkhir} (${x.predikat})\n- Supervisor: ${spvFix}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
                         const waUrl = `https://api.whatsapp.com/send?phone=${cleanWa}&text=${encodeURIComponent(msgWA)}`;
 
                         actionButtonsHtml += `
@@ -580,8 +598,8 @@
                     }
 
                     h+=`<div class="card-result">
-                            <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${x.guru}</div>
-                            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">${x.sekolah} | Mapel: ${x.mapel}</div>
+                            <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${guruFix}</div>
+                            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">${sekolahFix} | Mapel: ${mapelFix}</div>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-size:13px;">Tgl: ${tanggalRapi}</span>
                                 <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
@@ -624,22 +642,27 @@
         document.getElementById('view-main').style.display = 'none';
         document.getElementById('view-edit').style.display = 'block';
         
-        document.getElementById('edit-idTx').value = data.idTx || ""; 
-        document.getElementById('edit-header-info').innerText = `Mengedit Data: ${data.guru} (${formatTanggal(data.tanggal)})`;
+        const idTxFix = dapatkanNilai(data, 'idtx', 'idtransaksi', 'id');
+        document.getElementById('edit-idTx').value = idTxFix; 
+        
+        const guruFix = dapatkanNilai(data, 'guru', 'namaguru', 'pendidik');
+        const nipFix = dapatkanNilai(data, 'nipguru', 'nip', 'idguru');
+        const spvFix = dapatkanNilai(data, 'supervisor', 'k3s', 'namasupervisor');
+        const emailFix = dapatkanNilai(data, 'emailguru', 'email');
+        const waFix = dapatkanNilai(data, 'waguru', 'wa', 'whatsapp', 'nohp');
+        const sekolahFix = dapatkanNilai(data, 'sekolah', 'namasekolah');
+        const mapelFix = dapatkanNilai(data, 'mapel', 'matapelajaran');
 
-        // Load identitas untuk diedit
-        const nipFix = bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '';
-        const spvFix = bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namak3s') || '';
-        
+        document.getElementById('edit-header-info').innerText = `Mengedit Data: ${guruFix || '-'} (${formatTanggal(data.tanggal)})`;
+
         document.getElementById('edit-supervisor').value = spvFix;
-        document.getElementById('edit-guru').value = data.guru || "";
+        document.getElementById('edit-guru').value = guruFix;
         document.getElementById('edit-nip').value = nipFix;
-        document.getElementById('edit-email').value = data.emailGuru || data.email || "";
-        document.getElementById('edit-wa').value = data.waGuru || data.wa || "";
-        document.getElementById('edit-sekolah').value = data.sekolah || "";
-        document.getElementById('edit-mapel').value = data.mapel || "";
+        document.getElementById('edit-email').value = emailFix;
+        document.getElementById('edit-wa').value = waFix;
+        document.getElementById('edit-sekolah').value = sekolahFix;
+        document.getElementById('edit-mapel').value = mapelFix;
         
-        // Format tanggal agar masuk ke input type="date"
         let tglStr = "";
         if (data.tanggal) {
             try {
@@ -649,7 +672,6 @@
         }
         document.getElementById('edit-tanggal').value = tglStr;
 
-        // Load nilai tabel
         let admData = []; let tlhData = []; let obsData = [];
         try { admData = typeof data.administrasi === 'string' ? JSON.parse(data.administrasi) : (data.administrasi || []); } catch(e){}
         try { tlhData = typeof data.telaah === 'string' ? JSON.parse(data.telaah) : (data.telaah || []); } catch(e){}
@@ -689,7 +711,6 @@
 
         document.getElementById('btnUpdate').innerText = 'Memperbarui Data...';
         
-        // Payload sekarang mengirim data identitas juga
         const payload = {
             action: 'updateData',
             idTx: idTx,
