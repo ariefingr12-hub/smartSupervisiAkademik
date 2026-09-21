@@ -465,13 +465,19 @@
         detailDiv.style.display = detailDiv.style.display === 'none' ? 'block' : 'none';
     }
 
+    // FUNGSI BARU: Pelacak nama variabel anti-gagal
+    function bacaFleksibel(obj, kataKunci) {
+        const kunci = Object.keys(obj).find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === kataKunci);
+        return kunci && obj[kunci] && obj[kunci] !== "" ? obj[kunci] : null;
+    }
+
     function cetakPDF(idx, type) {
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
-        // Penyesuaian nama variabel dari Google Apps Script
-        const nipFix = data.nipGuru || data.nip || data.NIP || '-';
-        const spvFix = data.supervisor || data.namaSupervisor || data.nama_supervisor || '-';
+        // Membaca NIP & Supervisor secara dinamis meskipun ada spasi/huruf besar di database
+        const nipFix = bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '-';
+        const spvFix = bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namak3s') || '-';
         
         const printHtml = `
             <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
@@ -544,7 +550,7 @@
 
                     const tanggalRapi = formatTanggal(x.tanggal);
                     const vercelBaseUrl = window.location.origin + window.location.pathname;
-                    const spvFix = x.supervisor || x.namaSupervisor || x.nama_supervisor || '-';
+                    const spvFix = bacaFleksibel(x, 'namasupervisor') || bacaFleksibel(x, 'supervisor') || bacaFleksibel(x, 'namak3s') || '-';
                     
                     let actionButtonsHtml = `
                         <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
