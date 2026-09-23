@@ -183,11 +183,12 @@
                 <div class="form-group"><label>Hari / Tanggal Supervisi</label><input type="date" id="tanggal" required></div>
             </div>
 
-            <div class="section-title">BOBOT PENILAIAN (%)</div>
+            <!-- PERBAIKAN BOBOT: Default diubah ke 64, 60, 60 dan tulisan disesuaikan -->
+            <div class="section-title">BOBOT / SKOR MAKSIMAL PENILAIAN</div>
             <div class="form-grid">
-                <div class="form-group"><label>Bobot Administrasi (%)</label><input type="number" id="bobotAdmin" value="20" min="0" max="100" required></div>
-                <div class="form-group"><label>Bobot Telaah Perencanaan (%)</label><input type="number" id="bobotTelaah" value="40" min="0" max="100" required></div>
-                <div class="form-group"><label>Bobot Observasi Pelaksanaan (%)</label><input type="number" id="bobotObservasi" value="40" min="0" max="100" required></div>
+                <div class="form-group"><label>Bobot Administrasi</label><input type="number" id="bobotAdmin" value="64" min="0" required></div>
+                <div class="form-group"><label>Bobot Telaah Perencanaan</label><input type="number" id="bobotTelaah" value="60" min="0" required></div>
+                <div class="form-group"><label>Bobot Observasi Pelaksanaan</label><input type="number" id="bobotObservasi" value="60" min="0" required></div>
             </div>
 
             <div class="section-title">B. ADMINISTRASI (0-4)</div>
@@ -422,13 +423,13 @@
         const bTelaah = parseFloat(document.getElementById('bobotTelaah').value) || 0;
         const bObs = parseFloat(document.getElementById('bobotObservasi').value) || 0;
 
-        if (bAdmin + bTelaah + bObs !== 100) { alert('Total persentase bobot harus tepat 100%!'); return; }
+        // PERBAIKAN: Hapus pengecekan 100% agar pengguna bisa memasukkan skor 64, 60, dan 60.
+        
         document.getElementById('btnSubmit').innerText = 'Menyimpan Data...';
         document.getElementById('btnSubmit').disabled = true;
         
         const vercelBaseUrl = window.location.origin + window.location.pathname;
         
-        // PERBAIKAN 1: Urutan objek dikembalikan sesuai kolom database
         const pay = {
             action: 'simpanData',
             vercelBaseUrl: vercelBaseUrl, 
@@ -492,13 +493,13 @@
         return kunci && obj[kunci] && obj[kunci] !== "" ? obj[kunci] : null;
     }
 
-function cetakPDF(idx, type) {
+    function cetakPDF(idx, type) {
         const data = currentDataList[idx];
         const detailDiv = document.getElementById(`detail-${type}-${idx}`);
         
-        // PERBAIKAN: Menambahkan pemanggilan langsung ke data.nipGuru dan data.supervisor
-        const nipFix = data.nipGuru || data.nip || data.NIP || bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '-';
-        const spvFix = data.supervisor || data.namaSupervisor || data.Supervisor || bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || '-';
+        // PERBAIKAN: Penambahan fallback bacaFleksibel untuk memfasilitasi pembacaan kolom dari Google Sheets
+        const nipFix = data.nipGuru || data.nip || bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nipidguru') || bacaFleksibel(data, 'nip') || '-';
+        const spvFix = data.supervisor || data.namaSupervisor || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'namasupervisork3s') || '-';
         
         const printHtml = `
             <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;">
@@ -546,7 +547,6 @@ function cetakPDF(idx, type) {
         } catch(e) { return isoString; }
     }
 
-    // FUNGSI DOSEARCH YANG SUDAH DIPERBAIKI (Tahan banting terhadap error database)
     function doSearch(type){
         const kw = type === 'admin' ? document.getElementById('searchAdminKeyword').value : document.getElementById('searchPublicKeyword').value;
         const resultContainer = type === 'admin' ? document.getElementById('searchAdminResults') : document.getElementById('searchPublicResults');
@@ -560,100 +560,79 @@ function cetakPDF(idx, type) {
         fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(kw)}`)
             .then(res => res.json())
             .then(res => {
-                // Perbaikan 1: Menangkap data jika server mengembalikan Array langsung alih-alih Objek
-                const dataList = Array.isArray(res) ? res : (res.data || []);
+                if(!res.data || res.data.length===0){ resultContainer.innerHTML='<p style="text-align:center; color:#ef4444;">Data tidak ditemukan.</p>'; return; }
                 
-                if(dataList.length === 0){ 
-                    resultContainer.innerHTML='<p style="text-align:center; color:#ef4444;">Data tidak ditemukan.</p>'; 
-                    return; 
-                }
-                
-                currentDataList = dataList; 
+                currentDataList = res.data; 
                 let h=''; 
-                
-                dataList.forEach((x, idx) => { 
-                    try {
-                        let admData = [], tlhData = [], obsData = [];
-                        try { admData = typeof x.administrasi === 'string' ? JSON.parse(x.administrasi) : (x.administrasi || []); } catch(e){}
-                        try { tlhData = typeof x.telaah === 'string' ? JSON.parse(x.telaah) : (x.telaah || []); } catch(e){}
-                        try { obsData = typeof x.observasi === 'string' ? JSON.parse(x.observasi) : (x.observasi || []); } catch(e){}
+                res.data.forEach((x, idx)=>{ 
+                    let admData = [], tlhData = [], obsData = [];
+                    try { admData = typeof x.administrasi === 'string' ? JSON.parse(x.administrasi) : (x.administrasi || []); } catch(e){}
+                    try { tlhData = typeof x.telaah === 'string' ? JSON.parse(x.telaah) : (x.telaah || []); } catch(e){}
+                    try { obsData = typeof x.observasi === 'string' ? JSON.parse(x.observasi) : (x.observasi || []); } catch(e){}
 
-                        const tanggalRapi = formatTanggal(x.tanggal);
-                        const vercelBaseUrl = window.location.origin + window.location.pathname;
-                        const spvFix = bacaFleksibel(x, 'namasupervisor') || bacaFleksibel(x, 'supervisor') || bacaFleksibel(x, 'namak3s') || '-';
-                        const guruFix = x.guru || x.namaGuru || '-';
-                        const sekolahFix = x.sekolah || x.namaSekolah || '-';
-                        const mapelFix = x.mapel || x.mataPelajaran || '-';
-                        const nilaiFix = x.nilaiAkhir || x.nilai || '-';
-                        const predikatFix = x.predikat || '-';
+                    const tanggalRapi = formatTanggal(x.tanggal);
+                    const vercelBaseUrl = window.location.origin + window.location.pathname;
+                    
+                    // PERBAIKAN: Penambahan fallback bacaFleksibel di sini juga
+                    const spvFix = x.supervisor || x.namaSupervisor || bacaFleksibel(x, 'supervisor') || bacaFleksibel(x, 'namasupervisor') || bacaFleksibel(x, 'namasupervisork3s') || '-';
+                    
+                    let actionButtonsHtml = `
+                        <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
+                        <button class="btn btn-primary" style="padding:10px 14px; font-size:12px;" onclick="cetakPDF(${idx}, '${type}')">🖨️ Cetak / Simpan PDF</button>
+                    `;
+                    
+                    if (type === 'admin') {
+                        let cleanWa = (x.waGuru || '').replace(/[^0-9]/g, '');
+                        if(cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
                         
-                        let actionButtonsHtml = `
-                            <button class="detail-btn" style="flex:1;" onclick="toggleDetail(${idx}, '${type}')">📄 Lihat Rincian</button>
-                            <button class="btn btn-primary" style="padding:10px 14px; font-size:12px;" onclick="cetakPDF(${idx}, '${type}')">🖨️ Cetak / Simpan PDF</button>
+                        const linkRefleksi = `${vercelBaseUrl}?refleksi=${x.idTx || ''}`;
+                        const msgWA = `Yth. Bapak/Ibu ${x.guru},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${x.nilaiAkhir} (${x.predikat})\n- Supervisor: ${spvFix}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
+                        const waUrl = `https://api.whatsapp.com/send?phone=${cleanWa}&text=${encodeURIComponent(msgWA)}`;
+
+                        actionButtonsHtml += `
+                            <a href="${waUrl}" target="_blank" class="btn btn-wa" style="padding:10px 14px; font-size:12px;">📱 Kirim WA Report</a>
+                            <button class="btn btn-warning" style="padding:10px 14px; font-size:12px;" onclick="openEdit(${idx})">✏️ Edit Data</button>
                         `;
-                        
-                        if (type === 'admin') {
-                            // Perbaikan 2: Casting waGuru menjadi String eksplisit untuk mencegah error nomor tipe Integer
-                            let rawWa = x.waGuru || x.wa || x.noWa || '';
-                            let cleanWa = String(rawWa).replace(/[^0-9]/g, '');
-                            if(cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
-                            
-                            const linkRefleksi = `${vercelBaseUrl}?refleksi=${x.idTx || ''}`;
-                            const msgWA = `Yth. Bapak/Ibu ${guruFix},\n\nBerikut Laporan Supervisi Akademik Anda:\n- Tanggal: ${tanggalRapi}\n- Nilai Akhir: ${nilaiFix} (${predikatFix})\n- Supervisor: ${spvFix}\n\nSilakan isi Form Refleksi & RTL pada link berikut:\n${linkRefleksi}\n\nTerima kasih.`;
-                            const waUrl = `https://api.whatsapp.com/send?phone=${cleanWa}&text=${encodeURIComponent(msgWA)}`;
-
-                            actionButtonsHtml += `
-                                <a href="${waUrl}" target="_blank" class="btn btn-wa" style="padding:10px 14px; font-size:12px;">📱 Kirim WA Report</a>
-                                <button class="btn btn-warning" style="padding:10px 14px; font-size:12px;" onclick="openEdit(${idx})">✏️ Edit Data</button>
-                            `;
-                        }
-
-                        h+=`<div class="card-result">
-                                <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${guruFix}</div>
-                                <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">${sekolahFix} | Mapel: ${mapelFix}</div>
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:13px;">Tgl: ${tanggalRapi}</span>
-                                    <span>Nilai: <b style="color:var(--accent); font-size:16px;">${nilaiFix}</b> (${predikatFix})</span>
-                                </div>
-                                
-                                <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap;">
-                                    ${actionButtonsHtml}
-                                </div>
-                                
-                                <div id="detail-${type}-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto;">
-                                    
-                                    ${buildDetailedFormTable("B. ADMINISTRASI (0-4)", admData, adm, false)}
-                                    ${buildDetailedFormTable("C. TELAAH PERENCANAAN (0-4)", tlhData, tlh, true)}
-                                    ${buildDetailedFormTable("D. OBSERVASI PELAKSANAAN (0-4)", obsData, obs, true)}
-                                    
-                                    <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
-                                        <strong style="color:var(--text-dark); font-size:13px;">E. Catatan Khusus Supervisor:</strong><br>
-                                        <span style="font-size:13px; color:#475569;">${x.catatanKhusus || '-'}</span>
-                                    </div>
-
-                                    <div class="signature-box" style="margin-top:25px;">
-                                        <img src="${qrCodeImageSrc}" alt="QR Code Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;">
-                                        <div class="signature-info">
-                                            <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
-                                            <p style="margin:4px 0 0 0; color:var(--text-muted);">${spvFix}</p>
-                                            <p style="margin:4px 0 0 0; font-size:11px; color:#10b981;">
-                                                <b>✔ Tanda tangan digital disematkan (Scan QR)</b>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`; 
-                    } catch (renderError) {
-                        console.error("Gagal merender baris data:", renderError);
                     }
+
+                    h+=`<div class="card-result">
+                            <div style="font-size:16px; font-weight:bold; color:var(--primary-dark);">${x.guru}</div>
+                            <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">${x.sekolah} | Mapel: ${x.mapel}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:13px;">Tgl: ${tanggalRapi}</span>
+                                <span>Nilai: <b style="color:var(--accent); font-size:16px;">${x.nilaiAkhir}</b> (${x.predikat})</span>
+                            </div>
+                            
+                            <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap;">
+                                ${actionButtonsHtml}
+                            </div>
+                            
+                            <div id="detail-${type}-${idx}" style="display:none; margin-top:20px; padding:20px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; max-height: 500px; overflow-y:auto;">
+                                
+                                ${buildDetailedFormTable("B. ADMINISTRASI (0-4)", admData, adm, false)}
+                                ${buildDetailedFormTable("C. TELAAH PERENCANAAN (0-4)", tlhData, tlh, true)}
+                                ${buildDetailedFormTable("D. OBSERVASI PELAKSANAAN (0-4)", obsData, obs, true)}
+                                
+                                <div style="margin-top:15px; padding:15px; background:white; border:1px solid #e2e8f0; border-radius:8px;">
+                                    <strong style="color:var(--text-dark); font-size:13px;">E. Catatan Khusus Supervisor:</strong><br>
+                                    <span style="font-size:13px; color:#475569;">${x.catatanKhusus || '-'}</span>
+                                </div>
+
+                                <div class="signature-box" style="margin-top:25px;">
+                                    <img src="${qrCodeImageSrc}" alt="QR Code Tanda Tangan" style="width:90px; height:90px; border-radius:6px; border: 1px solid #cbd5e1;">
+                                    <div class="signature-info">
+                                        <p style="margin:0; font-weight:700;">Tanda Tangan Digital Supervisor</p>
+                                        <p style="margin:4px 0 0 0; color:var(--text-muted);">${spvFix}</p>
+                                        <p style="margin:4px 0 0 0; font-size:11px; color:#10b981;">
+                                            <b>✔ Tanda tangan digital disematkan (Scan QR)</b>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`; 
                 }); 
                 resultContainer.innerHTML=h;
-            })
-            .catch((err) => { 
-                // Perbaikan 3: Pesan error spesifik ke pengguna
-                console.error(err);
-                resultContainer.innerHTML = `<p style="text-align:center; color:#ef4444;">Pencarian terhenti: ${err.message}</p>`; 
-            });
+            }).catch(() => { resultContainer.innerHTML = '<p style="text-align:center; color:#ef4444;">Gagal terhubung ke server.</p>'; });
     }
 
     function openEdit(idx) {
@@ -664,8 +643,9 @@ function cetakPDF(idx, type) {
         document.getElementById('edit-idTx').value = data.idTx || ""; 
         document.getElementById('edit-header-info').innerText = `Mengedit Data: ${data.guru} (${formatTanggal(data.tanggal)})`;
 
-const nipFix = data.nipGuru || data.nip || data.NIP || bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nip') || '';
-const spvFix = data.supervisor || data.namaSupervisor || data.Supervisor || bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'supervisor') || '';
+        // PERBAIKAN: Penambahan fallback untuk form edit juga agar NIP dan Nama Supervisor muncul
+        const nipFix = data.nipGuru || data.nip || bacaFleksibel(data, 'nipguru') || bacaFleksibel(data, 'nipidguru') || bacaFleksibel(data, 'nip') || '';
+        const spvFix = data.supervisor || data.namaSupervisor || bacaFleksibel(data, 'supervisor') || bacaFleksibel(data, 'namasupervisor') || bacaFleksibel(data, 'namasupervisork3s') || '';
         
         document.getElementById('edit-supervisor').value = spvFix;
         document.getElementById('edit-guru').value = data.guru || "";
@@ -723,7 +703,6 @@ const spvFix = data.supervisor || data.namaSupervisor || data.Supervisor || baca
 
         document.getElementById('btnUpdate').innerText = 'Memperbarui Data...';
         
-        // PERBAIKAN 2: Ditambahkan kolom pelengkap agar posisi data tidak bergeser di database
         const payload = {
             action: 'updateData',
             idTx: idTx,
